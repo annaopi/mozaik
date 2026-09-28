@@ -28,10 +28,15 @@ export class LoopController {
 
 export class LoopRuleEngine {
 	decide(loop: Loop): LoopControlDirective | undefined {
-		for (const rule of loop.getController().rules) {
-			if (rule.when.isSatisfiedBy(loop)) {
-				return rule.then.execute(loop)
-			}
+		const satisfiedRules = loop.getController().rules.filter((rule) => rule.condition.isSatisfiedBy(loop))
+		if (satisfiedRules.length === 0) {
+			return undefined
 		}
+
+		const highestPriorityRule = satisfiedRules.reduce((highest, current) => {
+			return highest.priority > current.priority ? highest : current
+		})
+
+		return highestPriorityRule.action.execute(loop)
 	}
 }

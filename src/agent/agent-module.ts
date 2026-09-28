@@ -23,7 +23,7 @@ import { AdvanceLoopUseCase } from "src/mozaik/use-cases/advance-loop"
 import { LoopStateUseCase } from "src/mozaik/use-cases/loop-state"
 import { LoopSpecification } from "./loop/specification"
 import { CompleteAction, InferenceAction, LoopAction } from "./loop/action"
-import { LoopRule } from "./loop/rule"
+import { LoopRule, CreateLoopRuleParams } from "./loop/rule"
 
 export type InferenceRunnerConfig = {
 	supportedModels?: GenerativeModel[]
@@ -72,7 +72,7 @@ export function createAgentModule(config: AgentFamilyConfig) {
 	type CreateLoopParams = {
 		agentId: string
 		subject: string
-		rules: LoopRule[]
+		rules: CreateLoopRuleParams[]
 	}
 
 	async function createLoop(config: CreateLoopParams): Promise<Loop> {

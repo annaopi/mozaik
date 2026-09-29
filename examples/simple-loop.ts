@@ -1,6 +1,7 @@
 import "dotenv/config"
 import type { InferenceRequest } from "@inference/inference-runner"
 import { inference, complete, state, createLoop, advanceLoop, createAgent } from "./module"
+import { ToolUseAction } from "@agent/loop/action"
 const request: InferenceRequest = {
 	model: "gpt-5.4",
 	context: {

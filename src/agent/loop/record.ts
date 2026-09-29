@@ -2,7 +2,6 @@ import { CompletedOperation, PendingOperation } from "@agent/loop/operation"
 import { LoopTransition } from "@agent/loop/transition"
 import { InferenceRequest } from "@inference/inference-runner"
 import { LoopStateId } from "@agent/loop"
-import { LoopController } from "./controller"
 
 export interface LoopRecord {
 	id: string
@@ -13,5 +12,4 @@ export interface LoopRecord {
 	pendingOperation?: PendingOperation
 	transitionHistory: LoopTransition[]
 	operationHistory: CompletedOperation[]
-	controller: LoopController
 }

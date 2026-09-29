@@ -23,7 +23,8 @@ import { AdvanceLoopUseCase } from "src/mozaik/use-cases/advance-loop"
 import { LoopStateUseCase } from "src/mozaik/use-cases/loop-state"
 import { LoopSpecification } from "./loop/specification"
 import { CompleteAction, InferenceAction, LoopAction } from "./loop/action"
-import { LoopRule, CreateLoopRuleParams } from "./loop/rule"
+import { CreateLoopRuleParams } from "./loop/rule"
+import { RuleBook } from "./loop/rule-book"
 
 export type InferenceRunnerConfig = {
 	supportedModels?: GenerativeModel[]
@@ -54,34 +55,41 @@ export function createAgentModule(config: AgentFamilyConfig) {
 		)
 
 	const toolRunner = new LocalToolRunner()
+
 	// Use cases
 	const createAgentUseCase = new CreateAgentUseCase(agentRepository, uuidGenerator)
-	const createLoopUseCase = new CreateAgentLoopUseCase(agentRepository, agentLoopRepository, uuidGenerator, clock)
+	const createLoopUseCase = new CreateAgentLoopUseCase(agentLoopRepository, uuidGenerator, clock)
 
 	type CreateAgentParams = {
 		name: string
 		instruction: string
 		tools: Tool[]
 		handlers: SituationHandler[]
+		ruleBook: CreateLoopRuleParams[]
 	}
 	// Interfaces
 	async function createAgent(config: CreateAgentParams): Promise<AgentRecord> {
-		return await createAgentUseCase.execute(config.name, config.instruction, config.tools, config.handlers)
+		const ruleBook = RuleBook.create(config.ruleBook)
+		return await createAgentUseCase.execute(
+			config.name,
+			config.instruction,
+			config.tools,
+			config.handlers,
+			ruleBook,
+		)
 	}
 
 	type CreateLoopParams = {
-		agentId: string
 		subject: string
-		rules: CreateLoopRuleParams[]
 	}
 
 	async function createLoop(config: CreateLoopParams): Promise<Loop> {
-		return await createLoopUseCase.execute(config.agentId, config.subject, config.rules)
+		return await createLoopUseCase.execute(config.subject)
 	}
 
-	const advanceLoopUseCase = new AdvanceLoopUseCase(inferenceRunner)
-	async function advanceLoop(loop: Loop): Promise<Loop> {
-		return await advanceLoopUseCase.execute(loop)
+	const advanceLoopUseCase = new AdvanceLoopUseCase(inferenceRunner, toolRunner, agentRepository, agentLoopRepository)
+	async function advanceLoop(agentId: string, loopId: string): Promise<Loop> {
+		return await advanceLoopUseCase.execute(agentId, loopId)
 	}
 
 	const getLoopStateUseCase = new LoopStateUseCase()

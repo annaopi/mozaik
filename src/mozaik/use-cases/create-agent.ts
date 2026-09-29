@@ -7,6 +7,7 @@ import { ParticipantManifest } from "@environment/participant"
 import { Memory } from "@agent/memory"
 import { DeveloperMessageItem } from "@inference/context"
 import { AgentRecord } from "@agent/record"
+import { RuleBook } from "@agent/loop/rule-book"
 
 export class CreateAgentUseCase {
 	private readonly agentRepository: AgentRepository
@@ -22,6 +23,7 @@ export class CreateAgentUseCase {
 		instruction: string,
 		tools: Tool[],
 		handlers: SituationHandler[],
+		ruleBook: RuleBook,
 	): Promise<AgentRecord> {
 		const id = this.ids.generate()
 		const manifest: ParticipantManifest = { id, name, role: "agent" }
@@ -32,7 +34,7 @@ export class CreateAgentUseCase {
 		}
 		memory.getContext().items.push(developerMessageItem)
 
-		const agentRecord: AgentRecord = { id, manifest, tools, memory, handlers }
+		const agentRecord: AgentRecord = { id, manifest, tools, memory, handlers, ruleBook }
 		const agent = Agent.create(agentRecord)
 		await this.agentRepository.save(agent)
 		return agentRecord

@@ -3,7 +3,6 @@ import { InferenceRequest, InferenceResult } from "@inference/inference-runner"
 import { PendingOperation, PendingInference, PendingToolExecution, CompletedOperation } from "@agent/loop/operation"
 import { LoopTransition } from "@agent/loop/transition"
 import { LoopRecord } from "@agent/loop/record"
-import { LoopController } from "./controller"
 
 export type LoopStateId = "idle" | "awaiting_inference" | "awaiting_tool_output" | "stopped" | "completed"
 
@@ -16,7 +15,6 @@ export class Loop {
 	private readonly transitionHistory: LoopTransition[]
 	private inferenceRequest: InferenceRequest | undefined
 	private readonly operationHistory: CompletedOperation[]
-	private readonly controller: LoopController
 
 	private constructor(
 		loopId: string,
@@ -27,7 +25,6 @@ export class Loop {
 		pendingOperation: PendingOperation | undefined,
 		transitionHistory: LoopTransition[],
 		operationHistory: CompletedOperation[],
-		controller: LoopController,
 	) {
 		this.loopId = loopId
 		this.subject = subject
@@ -37,7 +34,6 @@ export class Loop {
 		this.pendingOperation = pendingOperation
 		this.transitionHistory = transitionHistory
 		this.operationHistory = operationHistory
-		this.controller = controller
 	}
 
 	get id(): string {
@@ -70,7 +66,6 @@ export class Loop {
 			pendingOperation: this.pendingOperation,
 			transitionHistory: [...this.transitionHistory],
 			operationHistory: [...this.operationHistory],
-			controller: this.controller,
 		}
 	}
 
@@ -203,13 +198,8 @@ export class Loop {
 
 		this.transitionTo("idle", "tool_execution_completed", occurredAt, operationId)
 	}
-
-	getController(): LoopController {
-		return this.controller
-	}
-
-	static create(id: string, subject: string, createdAt: Date, controller: LoopController): Loop {
-		return new Loop(id, subject, createdAt, "idle", undefined, undefined, [], [], controller)
+	static create(id: string, subject: string, createdAt: Date): Loop {
+		return new Loop(id, subject, createdAt, "idle", undefined, undefined, [], [])
 	}
 
 	static rehydrate(record: LoopRecord): Loop {
@@ -222,7 +212,6 @@ export class Loop {
 			record.pendingOperation,
 			[...record.transitionHistory],
 			[...record.operationHistory],
-			record.controller,
 		)
 	}
 }

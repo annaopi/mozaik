@@ -2,7 +2,7 @@ import { Tool } from "@inference/tool"
 import { ParticipantManifest } from "@environment/participant"
 import { Memory } from "./memory"
 import { SituationHandler } from "@environment/situation-handler"
-import { LoopController } from "./loop/controller"
+import { RuleBook } from "./loop/rule-book"
 
 export type AgentRecord = {
 	id: string
@@ -10,5 +10,5 @@ export type AgentRecord = {
 	tools: Tool[]
 	memory: Memory
 	handlers: SituationHandler[]
-	loopControllers?: Map<string, LoopController>
+	ruleBook: RuleBook
 }

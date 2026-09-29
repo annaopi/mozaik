@@ -1,7 +1,13 @@
+import { Agent } from "@agent/agent"
 import { Loop } from "@agent/loop"
 
+export type AgentLoop = {
+	readonly agent: Agent
+	readonly loop: Loop
+}
+
 export abstract class LoopSpecification {
-	abstract isSatisfiedBy(loop: Loop): boolean
+	abstract isSatisfiedBy(agentLoop: AgentLoop): boolean
 
 	and(other: LoopSpecification): LoopSpecification {
 		return new AndLoopSpecification(this, other)
@@ -24,8 +30,8 @@ class AndLoopSpecification extends LoopSpecification {
 		super()
 	}
 
-	isSatisfiedBy(loop: Loop): boolean {
-		return this.left.isSatisfiedBy(loop) && this.right.isSatisfiedBy(loop)
+	isSatisfiedBy(agentLoop: AgentLoop): boolean {
+		return this.left.isSatisfiedBy(agentLoop) && this.right.isSatisfiedBy(agentLoop)
 	}
 }
 
@@ -37,8 +43,8 @@ class OrLoopSpecification extends LoopSpecification {
 		super()
 	}
 
-	isSatisfiedBy(loop: Loop): boolean {
-		return this.left.isSatisfiedBy(loop) || this.right.isSatisfiedBy(loop)
+	isSatisfiedBy(agentLoop: AgentLoop): boolean {
+		return this.left.isSatisfiedBy(agentLoop) || this.right.isSatisfiedBy(agentLoop)
 	}
 }
 
@@ -47,37 +53,37 @@ class NotLoopSpecification extends LoopSpecification {
 		super()
 	}
 
-	isSatisfiedBy(loop: Loop): boolean {
-		return !this.rule.isSatisfiedBy(loop)
+	isSatisfiedBy(agentLoop: AgentLoop): boolean {
+		return !this.rule.isSatisfiedBy(agentLoop)
 	}
 }
 
 export class Idle extends LoopSpecification {
-	isSatisfiedBy(loop: Loop) {
-		return loop.stateId === "idle"
+	isSatisfiedBy(agentLoop: AgentLoop) {
+		return agentLoop.loop.stateId === "idle"
 	}
 }
 
 export class AwaitingInference extends LoopSpecification {
-	isSatisfiedBy(loop: Loop) {
-		return loop.stateId === "awaiting_inference"
+	isSatisfiedBy(agentLoop: AgentLoop) {
+		return agentLoop.loop.stateId === "awaiting_inference"
 	}
 }
 
 export class AwaitingToolOutput extends LoopSpecification {
-	isSatisfiedBy(loop: Loop) {
-		return loop.stateId === "awaiting_tool_output"
+	isSatisfiedBy(agentLoop: AgentLoop) {
+		return agentLoop.loop.stateId === "awaiting_tool_output"
 	}
 }
 
 export class Stopped extends LoopSpecification {
-	isSatisfiedBy(loop: Loop) {
-		return loop.stateId === "stopped"
+	isSatisfiedBy(agentLoop: AgentLoop) {
+		return agentLoop.loop.stateId === "stopped"
 	}
 }
 
 export class Completed extends LoopSpecification {
-	isSatisfiedBy(loop: Loop) {
-		return loop.stateId === "completed"
+	isSatisfiedBy(agentLoop: AgentLoop) {
+		return agentLoop.loop.stateId === "completed"
 	}
 }

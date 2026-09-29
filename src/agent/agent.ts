@@ -3,26 +3,24 @@ import { Participant, ParticipantManifest } from "@environment/participant"
 import { Tool } from "@inference/tool"
 import { SituationHandler } from "@environment/situation-handler"
 import { AgentRecord } from "@agent/record"
-import { LoopControlDirective } from "@agent/loop/directive"
-import { LoopController } from "@agent/loop/controller"
-import { LoopRule } from "@agent/loop/rule"
+import { RuleBook } from "@agent/loop/rule-book"
 
 export class Agent extends Participant {
 	private memory: Memory
 	private tools: Tool[]
-	private loopControllers: Map<string, LoopController>
+	private ruleBook: RuleBook
 
 	constructor(
 		manifest: ParticipantManifest,
 		tools: Tool[],
 		memory: Memory,
 		handlers: SituationHandler[],
-		loopControllers: Map<string, LoopController>,
+		ruleBook: RuleBook,
 	) {
 		super(manifest, handlers)
 		this.memory = memory
 		this.tools = tools
-		this.loopControllers = loopControllers
+		this.ruleBook = ruleBook
 	}
 
 	getTools(): Tool[] {
@@ -33,32 +31,8 @@ export class Agent extends Participant {
 		return this.memory
 	}
 
-	addRuleToLoop(loopId: string, rule: LoopRule): void {
-		const controller = this.loopControllers.get(loopId)
-		if (!controller) {
-			throw new Error(`Loop with id ${loopId} not found`)
-		}
-		controller.addRule(rule)
-	}
-
-	removeRuleFromLoop(loopId: string, rule: LoopRule): void {
-		const controller = this.loopControllers.get(loopId)
-		if (!controller) {
-			throw new Error(`Loop with id ${loopId} not found`)
-		}
-		controller.removeRule(rule)
-	}
-
-	decideNextAction(loopId: string): LoopControlDirective | undefined {
-		const controller = this.loopControllers.get(loopId)
-		if (!controller) {
-			throw new Error(`Loop with id ${loopId} not found`)
-		}
-		return controller.decide()
-	}
-
-	advanceLoop(loopId: string): LoopControlDirective | undefined {
-		return this.decideNextAction(loopId)
+	getRuleBook(): RuleBook {
+		return this.ruleBook
 	}
 
 	static create({
@@ -66,24 +40,19 @@ export class Agent extends Participant {
 		tools,
 		memory,
 		handlers,
+		ruleBook,
 	}: {
 		manifest: ParticipantManifest
 		tools: Tool[]
 		memory: Memory
 		handlers: SituationHandler[]
+		ruleBook: RuleBook
 	}): Agent {
-		const loopControllers = new Map<string, LoopController>()
-		return new Agent(manifest, tools, memory, handlers, loopControllers)
+		return new Agent(manifest, tools, memory, handlers, ruleBook)
 	}
 
 	static rehydrate(record: AgentRecord): Agent {
-		const agent = new Agent(
-			record.manifest,
-			record.tools,
-			record.memory,
-			record.handlers,
-			record.loopControllers ?? new Map<string, LoopController>(),
-		)
+		const agent = new Agent(record.manifest, record.tools, record.memory, record.handlers, record.ruleBook)
 		return agent
 	}
 }

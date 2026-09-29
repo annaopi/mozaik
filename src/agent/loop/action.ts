@@ -1,10 +1,9 @@
-import { Loop } from "@agent/loop"
+import { AgentLoop } from "@agent/loop/specification"
 import { LoopControlDirective } from "@agent/loop/directive"
-import { ToolUseRequest } from "@inference/context"
 import { InferenceRequest } from "@inference/inference-runner"
 
 export abstract class LoopAction {
-	abstract execute(loop: Loop): LoopControlDirective
+	abstract execute(agentLoop: AgentLoop): LoopControlDirective
 }
 
 export class InferenceAction extends LoopAction {
@@ -21,15 +20,18 @@ export class InferenceAction extends LoopAction {
 }
 
 export class ToolUseAction extends LoopAction {
-	private call: ToolUseRequest
+	execute(agentLoop: AgentLoop): LoopControlDirective {
+		if (!agentLoop.loop.pending) {
+			return { type: "wait" } as LoopControlDirective
+		}
 
-	constructor(call: ToolUseRequest) {
-		super()
-		this.call = call
-	}
+		const pendingOperation = agentLoop.loop.pending
 
-	execute(): LoopControlDirective {
-		return { type: "tool_use", call: this.call }
+		if (pendingOperation.type === "tool_execution") {
+			return { type: "tool_use", call: pendingOperation.call }
+		}
+
+		return { type: "wait" } as LoopControlDirective
 	}
 }
 

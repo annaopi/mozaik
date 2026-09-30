@@ -4,10 +4,9 @@ import { SituationHandler } from "@environment/situation-handler"
 import { AgentRepository } from "@agent/agent-repository"
 import { IdGenerator } from "@util/id-generator"
 import { ParticipantManifest } from "@environment/participant"
-import { ContextMemory } from "@agent/memory"
 import { DeveloperMessageItem } from "@inference/context"
 import { AgentRecord } from "@agent/record"
-import { RuntimeEvent } from "@environment/event"
+import { ContextMemory } from "../repositories/context-memory"
 
 export class CreateAgentUseCase {
 	private readonly agentRepository: AgentRepository

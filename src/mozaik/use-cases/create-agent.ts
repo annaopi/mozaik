@@ -7,6 +7,7 @@ import { ParticipantManifest } from "@environment/participant"
 import { ContextMemory } from "@agent/memory"
 import { DeveloperMessageItem } from "@inference/context"
 import { AgentRecord } from "@agent/record"
+import { RuntimeEvent } from "@environment/event"
 
 export class CreateAgentUseCase {
 	private readonly agentRepository: AgentRepository

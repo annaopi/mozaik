@@ -11,10 +11,14 @@ export class ParticipantJoinedEnvironmentUseCase {
 		this.eventPublisher = eventPublisher
 	}
 
-	async execute(environmentId: string, participant: Participant, occurredAt: Date): Promise<void> {
+	async execute(environmentId: string, participantId: string, occurredAt: Date): Promise<void> {
 		const environment = await this.environmentRepository.getById(environmentId)
 		if (!environment) {
 			throw new Error("Environment not found")
+		}
+		const participant = environment.getParticipant(participantId)
+		if (!participant) {
+			throw new Error("Participant not found")
 		}
 		const event = environment.addParticipant(participant, occurredAt)
 		if (event) {

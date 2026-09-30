@@ -1,4 +1,5 @@
 import { SituationHandler } from "@environment/situation-handler"
+import { RuntimeEvent } from "./event"
 
 export type ParticipantRole = "agent" | "external"
 
@@ -10,7 +11,7 @@ export type ParticipantManifest = {
 }
 
 export class Participant {
-	private readonly manifest: ParticipantManifest
+	private manifest: ParticipantManifest
 	private handlers: SituationHandler[]
 
 	constructor(manifest: ParticipantManifest, handlers: SituationHandler[]) {
@@ -20,6 +21,10 @@ export class Participant {
 
 	getManifest(): ParticipantManifest {
 		return this.manifest
+	}
+
+	setManifest(manifest: ParticipantManifest): void {
+		this.manifest = manifest
 	}
 
 	getId(): string {

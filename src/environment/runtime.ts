@@ -1,5 +1,5 @@
-import { SharedMemory } from "@environment/shared-memory"
+import { SharedState } from "@environment/shared-state"
 
-export class RuntimeService<TSharedMemory extends SharedMemory> {
-	constructor(public readonly sharedMemory: TSharedMemory) {}
+export class RuntimeService<TSharedState extends SharedState> {
+	constructor(public readonly state: TSharedState) {}
 }

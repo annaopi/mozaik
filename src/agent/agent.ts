@@ -3,6 +3,7 @@ import { Participant, ParticipantManifest } from "@environment/participant"
 import { Tool } from "@inference/tool"
 import { SituationHandler } from "@environment/situation-handler"
 import { AgentRecord } from "@agent/record"
+import { RuntimeEvent } from "@environment/event"
 
 export class Agent extends Participant {
 	private memory: Memory
@@ -37,7 +38,6 @@ export class Agent extends Participant {
 	}
 
 	static rehydrate(record: AgentRecord): Agent {
-		const agent = new Agent(record.manifest, record.tools, record.memory, record.handlers)
-		return agent
+		return new Agent(record.manifest, record.tools, record.memory, record.handlers)
 	}
 }

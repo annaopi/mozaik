@@ -1,17 +1,26 @@
-import { ParticipantJoinedEvent, ParticipantLeftEvent, RuntimeEvent } from "@environment/event"
+import { MessageSentEvent, ParticipantJoinedEvent, ParticipantLeftEvent, RuntimeEvent } from "@environment/event"
 import { Participant } from "@environment/participant"
+
+export type EnvironmentRecord = {
+	id: string
+	name: string
+	ownerId: string
+	participants: Participant[]
+}
 
 export class Environment {
 	private readonly id: string
 	private readonly ownerId: string
 	private name: string
 	private participants: Participant[]
+	private events: RuntimeEvent[]
 
-	constructor(id: string, name: string, ownerId: string, participants: Participant[]) {
+	constructor(id: string, name: string, ownerId: string, participants: Participant[], events: RuntimeEvent[] = []) {
 		this.id = id
 		this.ownerId = ownerId
 		this.name = name
 		this.participants = participants
+		this.events = events
 	}
 
 	getId(): string {
@@ -55,21 +64,30 @@ export class Environment {
 		return [...this.participants]
 	}
 
+	sendMessage(participant: Participant, message: string, occurredAt: Date): RuntimeEvent {
+		const event = MessageSentEvent.init(participant.getId(), message, occurredAt)
+		this.events.push(event)
+		return event
+	}
+
+	getEvents(): RuntimeEvent[] {
+		return [...this.events]
+	}
+
 	static create(id: string, name: string, ownerId: string, participants: Participant[] = []): Environment {
 		return new Environment(id, name, ownerId, participants)
 	}
 
-	static rehydrate({
-		id,
-		name,
-		ownerId,
-		participants,
-	}: {
-		id: string
-		name: string
-		ownerId: string
-		participants: Participant[]
-	}): Environment {
+	get record(): EnvironmentRecord {
+		return {
+			id: this.id,
+			name: this.name,
+			ownerId: this.ownerId,
+			participants: this.participants,
+		}
+	}
+
+	static rehydrate({ id, name, ownerId, participants }: EnvironmentRecord): Environment {
 		return new Environment(id, name, ownerId, participants)
 	}
 }

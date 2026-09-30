@@ -11,10 +11,14 @@ export class ParticipantLeftEnvironmentUseCase {
 		this.eventPublisher = eventPublisher
 	}
 
-	async execute(environmentId: string, participant: Participant, occurredAt: Date): Promise<void> {
+	async execute(environmentId: string, participantId: string, occurredAt: Date): Promise<void> {
 		const environment = await this.environmentRepository.getById(environmentId)
 		if (!environment) {
 			throw new Error("Squad not found")
+		}
+		const participant = environment.getParticipant(participantId)
+		if (!participant) {
+			throw new Error("Participant not found")
 		}
 		const event = environment.removeParticipant(participant, occurredAt)
 		if (event) {

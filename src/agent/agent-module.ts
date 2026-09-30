@@ -19,10 +19,10 @@ import { InferenceRequestValidator } from "@inference/request-validation/inferen
 import { supportedModels } from "@inference/models"
 import { AgentRecord } from "./record"
 import { Loop, LoopStateId } from "./loop"
-import { AdvanceLoopUseCase } from "src/mozaik/use-cases/advance-loop"
+import { AdvanceLoopUseCase, LoopAdvance } from "src/mozaik/use-cases/advance-loop"
 import { LoopStateUseCase } from "src/mozaik/use-cases/loop-state"
-import { LoopSpecification } from "./loop/specification"
-import { CompleteAction, InferenceAction, LoopAction } from "./loop/action"
+import { LoopSpecification, ModelAnswered } from "./loop/specification"
+import { CompleteAction, InferenceAction, LoopAction, ToolUseAction } from "./loop/action"
 import { CreateLoopRuleParams } from "./loop/rule"
 import { RuleBook } from "./loop/rule-book"
 
@@ -87,8 +87,15 @@ export function createAgentModule(config: AgentFamilyConfig) {
 		return await createLoopUseCase.execute(config.subject)
 	}
 
-	const advanceLoopUseCase = new AdvanceLoopUseCase(inferenceRunner, toolRunner, agentRepository, agentLoopRepository)
-	async function advanceLoop(agentId: string, loopId: string): Promise<Loop> {
+	const advanceLoopUseCase = new AdvanceLoopUseCase(
+		inferenceRunner,
+		toolRunner,
+		agentRepository,
+		agentLoopRepository,
+		uuidGenerator,
+		clock,
+	)
+	async function advanceLoop(agentId: string, loopId: string): Promise<LoopAdvance> {
 		return await advanceLoopUseCase.execute(agentId, loopId)
 	}
 
@@ -97,8 +104,16 @@ export function createAgentModule(config: AgentFamilyConfig) {
 		return getLoopStateUseCase.execute(loopStateId)
 	}
 
+	function modelAnswered(): LoopSpecification {
+		return new ModelAnswered()
+	}
+
 	function inference(request: InferenceRequest): LoopAction {
 		return new InferenceAction(request)
+	}
+
+	function toolUse(): LoopAction {
+		return new ToolUseAction()
 	}
 
 	function complete(reason: string): LoopAction {
@@ -110,7 +125,9 @@ export function createAgentModule(config: AgentFamilyConfig) {
 		createLoop,
 		advanceLoop,
 		state,
+		modelAnswered,
 		inference,
+		toolUse,
 		complete,
 	}
 }

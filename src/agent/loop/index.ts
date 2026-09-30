@@ -163,6 +163,20 @@ export class Loop {
 
 		this.inferenceRequest.context.items.push(...result.items)
 
+		const call = result.items.find((item): item is ToolUseRequest => item.type === "tool_use_request")
+
+		if (call) {
+			this.pendingOperation = {
+				id: call.requestId,
+				type: "tool_execution",
+				requestedAt: occurredAt,
+				call,
+			}
+
+			this.transitionTo("awaiting_tool_output", "tool_execution_requested", occurredAt, call.requestId)
+			return
+		}
+
 		this.pendingOperation = undefined
 
 		this.transitionTo("idle", "inference_completed", occurredAt, operationId)
@@ -198,6 +212,25 @@ export class Loop {
 
 		this.transitionTo("idle", "tool_execution_completed", occurredAt, operationId)
 	}
+
+	complete(reason: string, occurredAt: Date): void {
+		this.assertNotSettled("complete")
+		this.pendingOperation = undefined
+		this.transitionTo("completed", reason, occurredAt)
+	}
+
+	stop(reason: string, occurredAt: Date): void {
+		this.assertNotSettled("stop")
+		this.pendingOperation = undefined
+		this.transitionTo("stopped", reason, occurredAt)
+	}
+
+	private assertNotSettled(intent: string): void {
+		if (this.state === "completed" || this.state === "stopped") {
+			throw new Error(`Cannot ${intent} a loop that is already ${this.state}`)
+		}
+	}
+
 	static create(id: string, subject: string, createdAt: Date): Loop {
 		return new Loop(id, subject, createdAt, "idle", undefined, undefined, [], [])
 	}

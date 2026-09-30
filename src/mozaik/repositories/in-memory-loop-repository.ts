@@ -8,7 +8,12 @@ export class InMemoryLoopRepository implements LoopRepository {
 		return Promise.resolve(this.loops.find((loop) => loop.id === id))
 	}
 	save(loop: Loop): Promise<void> {
-		this.loops.push(loop)
+		const index = this.loops.findIndex((stored) => stored.id === loop.id)
+		if (index === -1) {
+			this.loops.push(loop)
+		} else {
+			this.loops[index] = loop
+		}
 		return Promise.resolve()
 	}
 }

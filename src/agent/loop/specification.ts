@@ -87,3 +87,16 @@ export class Completed extends LoopSpecification {
 		return agentLoop.loop.stateId === "completed"
 	}
 }
+
+export class ModelAnswered extends LoopSpecification {
+	isSatisfiedBy(agentLoop: AgentLoop) {
+		const operations = agentLoop.loop.completedOperations
+		const lastOperation = operations[operations.length - 1]
+
+		if (lastOperation?.type !== "inference") {
+			return false
+		}
+
+		return lastOperation.result.items.some((item) => item.type === "model_message")
+	}
+}

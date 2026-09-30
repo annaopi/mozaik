@@ -1,7 +1,6 @@
 import "dotenv/config"
 import type { InferenceRequest } from "@inference/inference-runner"
-import { inference, complete, state, createLoop, advanceLoop, createAgent } from "./module"
-import { ToolUseAction } from "@agent/loop/action"
+import { inference, complete, state, modelAnswered, toolUse, createLoop, createAgent, advanceLoop } from "./module"
 const request: InferenceRequest = {
 	model: "gpt-5.4",
 	context: {
@@ -22,16 +21,17 @@ async function run() {
 		handlers: [],
 		ruleBook: [
 			{
+				priority: 1,
+				when: state("idle").and(modelAnswered()),
+				then: complete("The joke was told."),
+			},
+			{
 				when: state("idle"),
 				then: inference(request),
 			},
 			{
 				when: state("awaiting_tool_output"),
-				then: new ToolUseAction(),
-			},
-			{
-				when: state("completed"),
-				then: complete("The joke was told."),
+				then: toolUse(),
 			},
 		],
 	})
@@ -40,9 +40,10 @@ async function run() {
 		subject: "Tell me a joke about the topic",
 	})
 
-	await advanceLoop(agent.id, loop.id)
-	console.log("loop state:", loop.stateId)
-	console.log("completed operations:", loop.completedOperations.length)
+	const result = await advanceLoop(agent.id, loop.id)
+	console.log("loop state:", result.loop.stateId)
+	console.log("completed operations:", result.loop.completedOperations.length)
+	console.log("transitions:", result.loop.history.map((transition) => transition.reason).join(" -> "))
 }
 
 run()

@@ -3,7 +3,6 @@ import { Participant, ParticipantManifest } from "@environment/participant"
 import { Tool } from "@inference/tool"
 import { SituationHandler } from "@environment/situation-handler"
 import { AgentRecord } from "@agent/record"
-import { RuleBook } from "@agent/loop/rule-book"
 
 export class Agent extends Participant {
 	private memory: Memory

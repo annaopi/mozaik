@@ -1,20 +1,24 @@
-import { ModelContext } from "@inference/context"
+import { Context } from "@inference/context"
 
-export class Memory {
-	private readonly context: ModelContext
+export interface Memory {
+	getContext(): Context
+}
 
-	private constructor(context: ModelContext) {
+export class ContextMemory implements Memory {
+	private readonly context: Context
+
+	private constructor(context: Context) {
 		this.context = context
 	}
 
-	getContext(): ModelContext {
+	getContext(): Context {
 		return this.context
 	}
 
 	static create(): Memory {
-		const context: ModelContext = {
+		const context: Context = {
 			items: [],
 		}
-		return new Memory(context)
+		return new ContextMemory(context)
 	}
 }

@@ -4,10 +4,9 @@ import { SituationHandler } from "@environment/situation-handler"
 import { AgentRepository } from "@agent/agent-repository"
 import { IdGenerator } from "@util/id-generator"
 import { ParticipantManifest } from "@environment/participant"
-import { Memory } from "@agent/memory"
+import { ContextMemory } from "@agent/memory"
 import { DeveloperMessageItem } from "@inference/context"
 import { AgentRecord } from "@agent/record"
-import { RuleBook } from "@agent/loop/rule-book"
 
 export class CreateAgentUseCase {
 	private readonly agentRepository: AgentRepository
@@ -26,7 +25,7 @@ export class CreateAgentUseCase {
 	): Promise<AgentRecord> {
 		const id = this.ids.generate()
 		const manifest: ParticipantManifest = { id, name, role: "agent" }
-		const memory = Memory.create()
+		const memory = ContextMemory.create()
 		const developerMessageItem: DeveloperMessageItem = {
 			type: "developer_message",
 			text: instruction,

@@ -24,7 +24,6 @@ import { LoopStateUseCase } from "src/mozaik/use-cases/loop-state"
 import { LoopSpecification, ModelAnswered } from "./loop/specification"
 import { CompleteAction, InferenceAction, LoopAction, ToolUseAction } from "./loop/action"
 import { CreateLoopRuleParams, LoopRule } from "./loop/rule"
-import { RuleBook } from "./loop/rule-book"
 
 export type InferenceRunnerConfig = {
 	supportedModels?: GenerativeModel[]

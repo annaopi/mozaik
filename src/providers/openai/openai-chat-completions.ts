@@ -34,7 +34,7 @@ export interface OpenAICompatibleConfig {
  * which is the dialect third-party OpenAI-compatible providers expose.
  *
  * The base URL and credential are configurable; everything else (the
- * `ModelContext` ⇄ chat-message conversion, tool-call round-trip, token
+ * `Context` ⇄ chat-message conversion, tool-call round-trip, token
  * usage extraction) is provider-agnostic. Provider-specific request
  * shaping (e.g. DeepSeek's `thinking` field) is supplied by the
  * consumer via {@link OpenAICompatibleConfig.extraBody} — mozaik stays

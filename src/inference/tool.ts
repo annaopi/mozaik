@@ -4,7 +4,7 @@ export interface FunctionTool {
 	description: string
 	parameters: Record<string, any>
 	strict: boolean
-	invoke: (args: any) => Promise<any>
+	invoke: (args: any) => Promise<any> | any
 }
 
 export interface InternalTool<T extends string> {

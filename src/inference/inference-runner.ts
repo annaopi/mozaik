@@ -1,5 +1,5 @@
 import { RuntimeEvent } from "@environment/event"
-import { ModelContext } from "@inference/context"
+import { Context } from "@inference/context"
 import { StructuredOutputFormat } from "@inference/request-validation/structured-output"
 import { TokenUsage } from "@inference/token-usage"
 import { Tool } from "@inference/tool"
@@ -12,7 +12,7 @@ export type InferenceRequest = {
 	tools?: Tool[]
 	streaming?: boolean
 	structuredOutput?: StructuredOutputFormat
-	context: ModelContext
+	context: Context
 }
 
 export type InferenceResult = {

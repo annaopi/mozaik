@@ -10,5 +10,4 @@ export type AgentRecord = {
 	tools: Tool[]
 	memory: Memory
 	handlers: SituationHandler[]
-	ruleBook: RuleBook
 }

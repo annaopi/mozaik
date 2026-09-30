@@ -66,6 +66,6 @@ export type ContextItem = MessageItem | ReasoningItem | ToolUseRequest | ToolUse
 
 export type ModelOutputItem = ModelMessageItem | ToolUseRequest | ReasoningItem
 
-export type ModelContext = {
+export type Context = {
 	readonly items: ContextItem[]
 }

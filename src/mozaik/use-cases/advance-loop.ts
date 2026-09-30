@@ -1,9 +1,11 @@
+import { Agent } from "@agent/agent"
 import { AgentRepository } from "@agent/agent-repository"
 import { Loop } from "@agent/loop"
 import { LoopControlDirective } from "@agent/loop/directive"
 import { RuleEngine } from "@agent/loop/rule-book"
 import { LoopRepository } from "@agent/loop/repository"
-import { InferenceRunner } from "@inference/inference-runner"
+import { ContextItem, MessageItem } from "@inference/context"
+import { InferenceRequest, InferenceRunner } from "@inference/inference-runner"
 import { ToolUseRunner } from "@inference/tool-use-runner"
 import { Clock } from "@util/clock"
 import { IdGenerator } from "@util/id-generator"
@@ -44,8 +46,9 @@ export class AdvanceLoopUseCase {
 		}
 
 		if (directive.type === "inference") {
-			const pending = loop.requestInference(this.ids.generate(), directive.request, this.clock.now())
-			const result = await this.inferenceRunner.run(directive.request)
+			const request = this.grounded(agent, directive.request)
+			const pending = loop.requestInference(this.ids.generate(), request, this.clock.now())
+			const result = await this.inferenceRunner.run(request)
 			loop.receiveInferenceResult(pending.id, result, this.clock.now())
 		} else if (directive.type === "tool_use") {
 			const pending = loop.pending
@@ -66,4 +69,41 @@ export class AdvanceLoopUseCase {
 
 		return { loop, directive }
 	}
+
+	// Mutates the directed request instead of copying it: the loop appends every
+	// inference and tool result to this same request, so a fresh object per turn
+	// would drop the context accumulated by earlier turns.
+	private grounded(agent: Agent, request: InferenceRequest): InferenceRequest {
+		const tools = agent.getTools()
+		if (request.tools === undefined && tools.length > 0) {
+			request.tools = tools
+		}
+
+		const instructions = agent
+			.getMemory()
+			.getContext()
+			.items.filter((instruction: ContextItem) => !isInContext(request.context.items, instruction))
+
+		request.context.items.unshift(...instructions)
+
+		return request
+	}
+}
+
+function isInContext(items: readonly ContextItem[], candidate: ContextItem): boolean {
+	return items.some((item) => {
+		if (item === candidate) {
+			return true
+		}
+
+		if (item.type !== candidate.type) {
+			return false
+		}
+
+		return isMessage(item) && isMessage(candidate) && item.text === candidate.text
+	})
+}
+
+function isMessage(item: ContextItem): item is MessageItem {
+	return "text" in item
 }

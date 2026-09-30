@@ -3,6 +3,7 @@ import { InferenceRequest, InferenceResult } from "@inference/inference-runner"
 import { PendingOperation, PendingInference, PendingToolExecution, CompletedOperation } from "@agent/loop/operation"
 import { LoopTransition } from "@agent/loop/transition"
 import { LoopRecord } from "@agent/loop/record"
+import { LoopRule } from "./rule"
 
 export type LoopStateId = "idle" | "awaiting_inference" | "awaiting_tool_output" | "stopped" | "completed"
 
@@ -15,6 +16,7 @@ export class Loop {
 	private readonly transitionHistory: LoopTransition[]
 	private inferenceRequest: InferenceRequest | undefined
 	private readonly operationHistory: CompletedOperation[]
+	private readonly loopRules: LoopRule[]
 
 	private constructor(
 		loopId: string,
@@ -25,6 +27,7 @@ export class Loop {
 		pendingOperation: PendingOperation | undefined,
 		transitionHistory: LoopTransition[],
 		operationHistory: CompletedOperation[],
+		rules: LoopRule[],
 	) {
 		this.loopId = loopId
 		this.subject = subject
@@ -34,6 +37,7 @@ export class Loop {
 		this.pendingOperation = pendingOperation
 		this.transitionHistory = transitionHistory
 		this.operationHistory = operationHistory
+		this.loopRules = rules
 	}
 
 	get id(): string {
@@ -56,6 +60,10 @@ export class Loop {
 		return this.operationHistory
 	}
 
+	get rules(): readonly LoopRule[] {
+		return this.loopRules
+	}
+
 	record(): LoopRecord {
 		return {
 			id: this.id,
@@ -66,6 +74,7 @@ export class Loop {
 			pendingOperation: this.pendingOperation,
 			transitionHistory: [...this.transitionHistory],
 			operationHistory: [...this.operationHistory],
+			rules: [...this.rules],
 		}
 	}
 
@@ -151,6 +160,7 @@ export class Loop {
 		if (!this.inferenceRequest) {
 			throw new Error("Inference request is not provided")
 		}
+		this.moveToIdle("inference_completed", occurredAt, operationId)
 
 		this.operationHistory.push({
 			type: "inference",
@@ -173,13 +183,11 @@ export class Loop {
 				call,
 			}
 
-			this.transitionTo("awaiting_tool_output", "tool_execution_requested", occurredAt, call.requestId)
+			this.transitionTo("awaiting_tool_output", "tool_use_requested", occurredAt, call.requestId)
 			return
 		}
 
 		this.pendingOperation = undefined
-
-		this.transitionTo("idle", "inference_completed", occurredAt, operationId)
 	}
 
 	receiveToolUseResult(operationId: string, result: ToolUseResult, occurredAt: Date): void {
@@ -210,7 +218,7 @@ export class Loop {
 
 		this.pendingOperation = undefined
 
-		this.transitionTo("idle", "tool_execution_completed", occurredAt, operationId)
+		this.transitionTo("idle", "tool_use_completed.", occurredAt, operationId)
 	}
 
 	complete(reason: string, occurredAt: Date): void {
@@ -231,8 +239,8 @@ export class Loop {
 		}
 	}
 
-	static create(id: string, subject: string, createdAt: Date): Loop {
-		return new Loop(id, subject, createdAt, "idle", undefined, undefined, [], [])
+	static create(id: string, subject: string, createdAt: Date, rules: LoopRule[]): Loop {
+		return new Loop(id, subject, createdAt, "idle", undefined, undefined, [], [], rules)
 	}
 
 	static rehydrate(record: LoopRecord): Loop {
@@ -245,6 +253,7 @@ export class Loop {
 			record.pendingOperation,
 			[...record.transitionHistory],
 			[...record.operationHistory],
+			[...record.rules],
 		)
 	}
 }

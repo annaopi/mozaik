@@ -23,7 +23,6 @@ export class CreateAgentUseCase {
 		instruction: string,
 		tools: Tool[],
 		handlers: SituationHandler[],
-		ruleBook: RuleBook,
 	): Promise<AgentRecord> {
 		const id = this.ids.generate()
 		const manifest: ParticipantManifest = { id, name, role: "agent" }
@@ -34,7 +33,7 @@ export class CreateAgentUseCase {
 		}
 		memory.getContext().items.push(developerMessageItem)
 
-		const agentRecord: AgentRecord = { id, manifest, tools, memory, handlers, ruleBook }
+		const agentRecord: AgentRecord = { id, manifest, tools, memory, handlers }
 		const agent = Agent.create(agentRecord)
 		await this.agentRepository.save(agent)
 		return agentRecord

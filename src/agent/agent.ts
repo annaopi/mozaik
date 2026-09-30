@@ -8,19 +8,11 @@ import { RuleBook } from "@agent/loop/rule-book"
 export class Agent extends Participant {
 	private memory: Memory
 	private tools: Tool[]
-	private ruleBook: RuleBook
 
-	constructor(
-		manifest: ParticipantManifest,
-		tools: Tool[],
-		memory: Memory,
-		handlers: SituationHandler[],
-		ruleBook: RuleBook,
-	) {
+	constructor(manifest: ParticipantManifest, tools: Tool[], memory: Memory, handlers: SituationHandler[]) {
 		super(manifest, handlers)
 		this.memory = memory
 		this.tools = tools
-		this.ruleBook = ruleBook
 	}
 
 	getTools(): Tool[] {
@@ -31,28 +23,22 @@ export class Agent extends Participant {
 		return this.memory
 	}
 
-	getRuleBook(): RuleBook {
-		return this.ruleBook
-	}
-
 	static create({
 		manifest,
 		tools,
 		memory,
 		handlers,
-		ruleBook,
 	}: {
 		manifest: ParticipantManifest
 		tools: Tool[]
 		memory: Memory
 		handlers: SituationHandler[]
-		ruleBook: RuleBook
 	}): Agent {
-		return new Agent(manifest, tools, memory, handlers, ruleBook)
+		return new Agent(manifest, tools, memory, handlers)
 	}
 
 	static rehydrate(record: AgentRecord): Agent {
-		const agent = new Agent(record.manifest, record.tools, record.memory, record.handlers, record.ruleBook)
+		const agent = new Agent(record.manifest, record.tools, record.memory, record.handlers)
 		return agent
 	}
 }

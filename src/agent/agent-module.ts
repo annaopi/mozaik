@@ -23,7 +23,7 @@ import { AdvanceLoopUseCase, LoopAdvance } from "src/mozaik/use-cases/advance-lo
 import { LoopStateUseCase } from "src/mozaik/use-cases/loop-state"
 import { LoopSpecification, ModelAnswered } from "./loop/specification"
 import { CompleteAction, InferenceAction, LoopAction, ToolUseAction } from "./loop/action"
-import { CreateLoopRuleParams } from "./loop/rule"
+import { CreateLoopRuleParams, LoopRule } from "./loop/rule"
 import { RuleBook } from "./loop/rule-book"
 
 export type InferenceRunnerConfig = {
@@ -65,26 +65,20 @@ export function createAgentModule(config: AgentFamilyConfig) {
 		instruction: string
 		tools: Tool[]
 		handlers: SituationHandler[]
-		ruleBook: CreateLoopRuleParams[]
 	}
 	// Interfaces
 	async function createAgent(config: CreateAgentParams): Promise<AgentRecord> {
-		const ruleBook = RuleBook.create(config.ruleBook)
-		return await createAgentUseCase.execute(
-			config.name,
-			config.instruction,
-			config.tools,
-			config.handlers,
-			ruleBook,
-		)
+		return await createAgentUseCase.execute(config.name, config.instruction, config.tools, config.handlers)
 	}
 
 	type CreateLoopParams = {
 		subject: string
+		rules: CreateLoopRuleParams[]
 	}
 
 	async function createLoop(config: CreateLoopParams): Promise<Loop> {
-		return await createLoopUseCase.execute(config.subject)
+		const rules = config.rules.map((rule) => LoopRule.create(rule))
+		return await createLoopUseCase.execute(config.subject, rules)
 	}
 
 	const advanceLoopUseCase = new AdvanceLoopUseCase(
@@ -116,8 +110,8 @@ export function createAgentModule(config: AgentFamilyConfig) {
 		return new ToolUseAction()
 	}
 
-	function complete(reason: string): LoopAction {
-		return new CompleteAction(reason)
+	function complete(reason?: string): LoopAction {
+		return new CompleteAction(reason ?? "loop_completed")
 	}
 
 	return {

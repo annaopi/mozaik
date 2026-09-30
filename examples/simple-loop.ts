@@ -1,6 +1,7 @@
 import "dotenv/config"
 import type { InferenceRequest } from "@inference/inference-runner"
 import { inference, complete, state, modelAnswered, toolUse, createLoop, createAgent, advanceLoop } from "./module"
+import { Tool } from "@inference/tool"
 const request: InferenceRequest = {
 	model: "gpt-5.4",
 	context: {
@@ -13,18 +14,33 @@ const request: InferenceRequest = {
 	},
 }
 
+export const jokeTellerTool: Tool = {
+	name: "joke-actors",
+	description: "Get joke actors.",
+	parameters: {
+		type: "object",
+		properties: {
+			topic: { type: "string" },
+		},
+	},
+	type: "function",
+	strict: false,
+	invoke: function (args: { topic: string }): string {
+		return "Blondes"
+	},
+}
+
 async function run() {
 	const agent = await createAgent({
 		name: "joke-teller",
-		instruction: "You are a joke teller. You are given a topic and you need to tell a joke about it.",
-		tools: [],
+		instruction: "You are a joke teller. Use joke-actors tool to get joke actors.",
+		tools: [jokeTellerTool],
 		handlers: [],
-		ruleBook: [
-			{
-				priority: 1,
-				when: state("idle").and(modelAnswered()),
-				then: complete("The joke was told."),
-			},
+	})
+
+	const loop = await createLoop({
+		subject: "Tell me a joke about the topic",
+		rules: [
 			{
 				when: state("idle"),
 				then: inference(request),
@@ -33,17 +49,20 @@ async function run() {
 				when: state("awaiting_tool_output"),
 				then: toolUse(),
 			},
+			{
+				when: modelAnswered(),
+				then: complete(),
+			},
 		],
 	})
 
-	const loop = await createLoop({
-		subject: "Tell me a joke about the topic",
-	})
+	while (loop.stateId !== "completed") {
+		await advanceLoop(agent.id, loop.id)
+	}
 
-	const result = await advanceLoop(agent.id, loop.id)
-	console.log("loop state:", result.loop.stateId)
-	console.log("completed operations:", result.loop.completedOperations.length)
-	console.log("transitions:", result.loop.history.map((transition) => transition.reason).join(" -> "))
+	console.log("loop state:", loop.stateId)
+	console.log("completed operations:", loop.completedOperations.length)
+	console.log("transitions:", loop.history.map((transition) => transition.reason).join(" -> "))
 }
 
 run()

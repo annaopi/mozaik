@@ -34,9 +34,8 @@ export class RuleBook {
 
 export class RuleEngine {
 	decide(agent: Agent, loop: Loop): LoopControlDirective | undefined {
-		const ruleBook = agent.getRuleBook()
 		const agentLoop: AgentLoop = { agent, loop }
-		const satisfiedRules = ruleBook.rules.filter((rule) => rule.condition.isSatisfiedBy(agentLoop))
+		const satisfiedRules = loop.rules.filter((rule) => rule.condition.isSatisfiedBy(agentLoop))
 		if (satisfiedRules.length === 0) {
 			return undefined
 		}

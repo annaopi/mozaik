@@ -6,16 +6,35 @@ import type { InferenceInput } from "@app/states/inference"
 import { OpenAIResponsesMapper } from "./openai-responses-mapper"
 import type { InferenceEndpointMapper } from "@domain/generative-model/inference-endpoint-mapper"
 
+/**
+ * Optional connection config. When omitted, the `openai` SDK reads
+ * `OPENAI_API_KEY` and `OPENAI_BASE_URL` from the environment.
+ */
+export interface OpenAIResponsesConfig {
+	baseURL?: string
+	apiKey?: string
+}
+
 export class OpenAIResponses implements Endpoint {
 	endpointMapper: InferenceEndpointMapper
 	private _client?: OpenAI
+	private readonly clientConfig: OpenAIResponsesConfig
 
-	constructor(endpointMapper: InferenceEndpointMapper = new OpenAIResponsesMapper()) {
+	constructor(
+		endpointMapper: InferenceEndpointMapper = new OpenAIResponsesMapper(),
+		config: OpenAIResponsesConfig = {},
+	) {
 		this.endpointMapper = endpointMapper
+		this.clientConfig = config
 	}
 
 	private get client(): OpenAI {
-		return (this._client ??= new OpenAI())
+		// Passing `undefined` for baseURL/apiKey lets the SDK fall back
+		// to OPENAI_BASE_URL / OPENAI_API_KEY from the environment.
+		return (this._client ??= new OpenAI({
+			baseURL: this.clientConfig.baseURL,
+			apiKey: this.clientConfig.apiKey,
+		}))
 	}
 
 	async infer(inferenceInput: InferenceInput): Promise<InferenceOutput> {

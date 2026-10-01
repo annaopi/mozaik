@@ -1,5 +1,6 @@
 import { MessageSentEvent, ParticipantJoinedEvent, ParticipantLeftEvent, SpaceEvent } from "@domain/space/event"
 import { Participant } from "@domain/space/participant"
+import { UuidGenerator } from "@util/uuid-generator"
 
 export type SpaceRecord = {
 	id: string
@@ -74,7 +75,8 @@ export class Space {
 		return [...this.events]
 	}
 
-	static create(id: string, name: string, ownerId: string, participants: Participant[] = []): Space {
+	static create(name: string, ownerId: string, participants: Participant[] = []): Space {
+		const id = UuidGenerator.create()
 		return new Space(id, name, ownerId, participants)
 	}
 

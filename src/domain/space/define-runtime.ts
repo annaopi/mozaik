@@ -30,7 +30,7 @@ export function defineRuntime<TSharedState extends SharedState>() {
 		return runtime
 	}
 
-	const createParticipantUseCase = new CreateParticipantUseCase(new UuidGenerator())
+	const createParticipantUseCase = new CreateParticipantUseCase()
 
 	const createParticipant = async (name: string, capabilities: readonly string[], handlers: SituationHandler[]) => {
 		return await createParticipantUseCase.execute(name, capabilities, handlers)

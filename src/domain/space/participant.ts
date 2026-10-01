@@ -1,5 +1,4 @@
 import { SituationHandler } from "@domain/space/situation-handler"
-import { SpaceEvent } from "./event"
 
 export type ParticipantRole = "agent" | "external"
 

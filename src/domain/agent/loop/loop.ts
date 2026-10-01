@@ -31,7 +31,6 @@ export class Loop {
 	private inferenceRequest: InferenceRequest | undefined
 	private readonly operationHistory: CompletedOperation[]
 	private readonly loopRules: LoopRule[]
-	private readonly executionStrategy: "manual" | "auto"
 
 	private constructor(
 		loopId: string,
@@ -44,7 +43,6 @@ export class Loop {
 		transitionHistory: LoopTransition[],
 		operationHistory: CompletedOperation[],
 		rules: LoopRule[],
-		executionStrategy: "manual" | "auto",
 	) {
 		this.loopId = loopId
 		this.agentId = agentId
@@ -56,7 +54,6 @@ export class Loop {
 		this.transitionHistory = transitionHistory
 		this.operationHistory = operationHistory
 		this.loopRules = rules
-		this.executionStrategy = executionStrategy
 	}
 
 	get id(): string {
@@ -87,10 +84,6 @@ export class Loop {
 		return this.loopRules
 	}
 
-	get strategy(): "manual" | "auto" {
-		return this.executionStrategy
-	}
-
 	getAgentId(): string {
 		return this.agentId
 	}
@@ -107,7 +100,6 @@ export class Loop {
 			transitionHistory: [...this.transitionHistory],
 			operationHistory: [...this.operationHistory],
 			rules: [...this.rules],
-			executionStrategy: this.executionStrategy,
 		}
 	}
 
@@ -299,7 +291,6 @@ export class Loop {
 			[],
 			[],
 			rules,
-			executionStrategy,
 		)
 	}
 
@@ -315,7 +306,6 @@ export class Loop {
 			[...record.transitionHistory],
 			[...record.operationHistory],
 			[...record.rules],
-			record.executionStrategy,
 		)
 	}
 }

@@ -11,7 +11,7 @@ export class ParticipantJoinedUseCase {
 	}
 
 	async execute(spaceId: string, participantId: string, occurredAt: Date): Promise<void> {
-		const space = await this.spaceRepository.getById(spaceId)
+		const space = await this.spaceRepository.findById(spaceId)
 		if (!space) {
 			throw new Error("Space not found")
 		}

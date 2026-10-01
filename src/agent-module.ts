@@ -1,10 +1,8 @@
-import { UuidGenerator } from "@util/uuid-generator"
 import { CreateAgentUseCase } from "@application/use-cases/create-agent"
 import { InMemoryAgentRepository } from "@infrastructure/repositories/in-memory-agent-repository"
 import { Tool } from "@domain/inference/tool"
 import { SituationHandler } from "@domain/space/situation-handler"
 import { CreateAgentLoopUseCase } from "@application/use-cases/create-loop"
-import { SystemClock } from "@util/system-clock"
 import { InMemoryLoopRepository } from "@infrastructure/repositories/in-memory-loop-repository"
 import { InferenceRunner } from "@domain/inference/inference-runner"
 import { AgentRepository } from "@domain/agent/agent-repository"
@@ -17,7 +15,7 @@ import { InferenceRequestValidator } from "@domain/inference/request-validation/
 import { supportedModels } from "@infrastructure/providers/supported-models"
 import { AgentRecord } from "./domain/agent/record"
 import { Loop, LoopStateId } from "./domain/agent/loop/loop"
-import { AdvanceLoopUseCase } from "@application/use-cases/advance-loop"
+import { RunLoopUseCase } from "@application/use-cases/run-loop"
 import { LoopStateUseCase } from "@application/use-cases/loop-state"
 import { LoopSpecification, ModelAnswered } from "./domain/agent/loop/specification"
 import { CompleteAction, InferenceAction, LoopAction, ToolUseAction } from "./domain/agent/loop/action"
@@ -70,18 +68,17 @@ export function createAgentModule(config: AgentFamilyConfig) {
 		subject: string
 		agentId: string
 		rules: CreateLoopRuleParams[]
-		executionStrategy: "manual" | "auto"
 	}
 
 	async function createLoop(params: CreateLoopParams): Promise<Loop> {
 		const rules = params.rules.map((rule) => LoopRule.create(rule))
-		return await createLoopUseCase.execute(params.subject, params.agentId, rules, params.executionStrategy)
+		return await createLoopUseCase.execute(params.subject, params.agentId, rules)
 	}
 
-	const advanceLoopUseCase = new AdvanceLoopUseCase(inferenceRunner, toolRunner, agentRepository, agentLoopRepository)
+	const runLoopUseCase = new RunLoopUseCase(inferenceRunner, toolRunner, agentRepository, agentLoopRepository)
 
-	async function advanceLoop(loopId: string): Promise<void> {
-		await advanceLoopUseCase.execute(loopId)
+	async function runLoop(loopId: string): Promise<Loop> {
+		return await runLoopUseCase.execute(loopId)
 	}
 
 	const getLoopStateUseCase = new LoopStateUseCase()
@@ -108,7 +105,7 @@ export function createAgentModule(config: AgentFamilyConfig) {
 	return {
 		createAgent,
 		createLoop,
-		advanceLoop,
+		runLoop,
 		state,
 		modelAnswered,
 		runInference,

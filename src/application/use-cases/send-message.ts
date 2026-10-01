@@ -8,7 +8,7 @@ export class SendMessageUseCase {
 	) {}
 
 	async execute(spaceId: string, participantId: string, message: string): Promise<void> {
-		const space = await this.spaceRepository.getById(spaceId)
+		const space = await this.spaceRepository.findById(spaceId)
 		if (!space) {
 			throw new Error("Space not found")
 		}

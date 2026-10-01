@@ -7,13 +7,8 @@ import { UuidGenerator } from "@util/uuid-generator"
 export class CreateAgentLoopUseCase {
 	constructor(private readonly loopRepository: LoopRepository) {}
 
-	async execute(
-		subject: string,
-		agentId: string,
-		rules: LoopRule[],
-		executionStrategy: "manual" | "auto",
-	): Promise<Loop> {
-		const loop = Loop.create(UuidGenerator.create(), agentId, subject, SystemClock.now(), rules, executionStrategy)
+	async execute(subject: string, agentId: string, rules: LoopRule[]): Promise<Loop> {
+		const loop = Loop.create(UuidGenerator.create(), agentId, subject, SystemClock.now(), rules)
 		await this.loopRepository.save(loop)
 		return loop
 	}

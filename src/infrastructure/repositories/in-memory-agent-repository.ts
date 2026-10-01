@@ -7,10 +7,10 @@ export class InMemoryAgentRepository implements AgentRepository {
 	exists(id: string): Promise<boolean> {
 		return Promise.resolve(this.agents.some((agent) => agent.getManifest().id === id))
 	}
-	getById(id: string): Promise<Agent | undefined> {
+	findById(id: string): Promise<Agent | undefined> {
 		return Promise.resolve(this.agents.find((agent) => agent.getManifest().id === id))
 	}
-	getAll(): Promise<Agent[]> {
+	findAll(): Promise<Agent[]> {
 		return Promise.resolve(this.agents)
 	}
 

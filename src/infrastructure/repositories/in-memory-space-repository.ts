@@ -8,11 +8,11 @@ export class InMemorySpaceRepository implements SpaceRepository {
 		this.spaces.push(space)
 	}
 
-	async getById(id: string): Promise<Space | undefined> {
+	async findById(id: string): Promise<Space | undefined> {
 		return this.spaces.find((space) => space.getId() === id)
 	}
 
-	async getAllByOwnerId(ownerId: string): Promise<Space[]> {
+	async findAllByOwnerId(ownerId: string): Promise<Space[]> {
 		return this.spaces.filter((space) => space.getOwnerId() === ownerId)
 	}
 

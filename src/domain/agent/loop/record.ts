@@ -15,5 +15,4 @@ export interface LoopRecord {
 	transitionHistory: LoopTransition[]
 	operationHistory: CompletedOperation[]
 	rules: LoopRule[]
-	executionStrategy: "manual" | "auto"
 }

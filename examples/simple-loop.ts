@@ -1,5 +1,5 @@
 import "dotenv/config"
-import { complete, state, modelAnswered, toolUse, createLoop, createAgent, advanceLoop, runInference } from "./module"
+import { complete, state, modelAnswered, toolUse, createLoop, createAgent, runLoop, runInference } from "./module"
 import { Tool } from "@domain/inference/tool"
 import { AgentLoop } from "@domain/agent/loop/specification"
 import { LoopControlDirective } from "@domain/agent/loop/directive"
@@ -68,10 +68,9 @@ async function run() {
 				then: complete(),
 			},
 		],
-		executionStrategy: "auto",
 	})
 
-	await advanceLoop(loop.id)
+	await runLoop(loop.id)
 
 	console.log("loop state:", loop.stateId)
 	console.log("completed operations:", loop.completedOperations.length)

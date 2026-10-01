@@ -1,5 +1,5 @@
 import { Memory, MemoryFactory } from "@domain/agent/memory"
-import { RuntimeMemory } from "./runtime-memory"
+import { RuntimeMemory } from "@infrastructure/memory/runtime-memory"
 import { Context } from "@domain/inference/context"
 
 export class RuntimeMemoryFactory implements MemoryFactory {

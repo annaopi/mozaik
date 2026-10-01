@@ -1,5 +1,5 @@
-import { createAgentModule } from "@agent/agent-module"
-import { LocalToolRunner } from "src/mozaik/runners/local-tool-runner"
+import { createAgentModule } from "src/agent-module"
+import { LocalToolRunner } from "@application/runners/local-tool-runner"
 
 const agentModule = createAgentModule({
 	toolRunner: new LocalToolRunner(),

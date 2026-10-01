@@ -1,9 +1,9 @@
 import "dotenv/config"
 import { complete, state, modelAnswered, toolUse, createLoop, createAgent, advanceLoop, runInference } from "./module"
-import { Tool } from "@inference/tool"
-import { AgentLoop } from "@agent/loop/specification"
-import { LoopControlDirective } from "@agent/loop/directive"
-import { LoopAction } from "@agent/loop/action"
+import { Tool } from "@domain/inference/tool"
+import { AgentLoop } from "@domain/agent/loop/specification"
+import { LoopControlDirective } from "@domain/agent/loop/directive"
+import { LoopAction } from "@domain/agent/loop/action"
 
 export const jokeTellerTool: Tool = {
 	name: "joke-actors",
@@ -42,7 +42,7 @@ async function run() {
 		handlers: [],
 	})
 
-	agent.memory.getContext().items.push({
+	agent.memory.saveItem({
 		type: "user_message",
 		text: "Tell me a joke about the basketball players",
 	})

@@ -14,6 +14,17 @@ import { gpt54MiniSpecification } from "@infra/providers/openai/models/gpt-5-4-m
 import { gpt54NanoSpecification } from "@infra/providers/openai/models/gpt-5-4-nano"
 import { gpt55Specification } from "@infra/providers/openai/models/gpt-5-5"
 import { claudeHaiku45Specification } from "@infra/providers/anthropic/models/claude-4-5-haiku"
+import { gpt6AstraSpecification } from "@infra/providers/openai/models/gpt-6-astra"
+import { gpt61SolSpecification } from "@infra/providers/openai/models/gpt-6-1-sol"
+import { gpt6SolSpecification } from "@infra/providers/openai/models/gpt-6-sol"
+import { gpt6LunaSpecification } from "@infra/providers/openai/models/gpt-6-luna"
+import { claudeFable51Specification } from "@infra/providers/anthropic/models/claude-5-1-fable"
+import { claudeOpus55Specification } from "@infra/providers/anthropic/models/claude-5-5-opus"
+import { claudeSonnet55Specification } from "@infra/providers/anthropic/models/claude-5-5-sonnet"
+import { claudeSonnet5Specification } from "@infra/providers/anthropic/models/claude-5-sonnet"
+import { gemini38FlashSpecification } from "@infra/providers/gemini/models/gemini-3-8-flash"
+import { gemini35FlashLiteSpecification } from "@infra/providers/gemini/models/gemini-3-5-flash-lite"
+import { deepSeekFlashSpecification } from "@infra/providers/deepseek/models/deepseek-flash"
 import type { GenerativeModel } from "@domain/generative-model/generative-model"
 
 export const supportedModels: GenerativeModel[] = [
@@ -34,6 +45,22 @@ export const supportedModels: GenerativeModel[] = [
 		specification: gpt55Specification,
 	},
 	{
+		endpoint: new OpenAIResponses(),
+		specification: gpt6LunaSpecification,
+	},
+	{
+		endpoint: new OpenAIResponses(),
+		specification: gpt6SolSpecification,
+	},
+	{
+		endpoint: new OpenAIResponses(),
+		specification: gpt61SolSpecification,
+	},
+	{
+		endpoint: new OpenAIResponses(),
+		specification: gpt6AstraSpecification,
+	},
+	{
 		endpoint: new AnthropicMessages(),
 		specification: claudeHaiku45Specification,
 	},
@@ -50,6 +77,22 @@ export const supportedModels: GenerativeModel[] = [
 		specification: claudeOpus48Specification,
 	},
 	{
+		endpoint: new AnthropicMessages(),
+		specification: claudeSonnet5Specification,
+	},
+	{
+		endpoint: new AnthropicMessages(),
+		specification: claudeSonnet55Specification,
+	},
+	{
+		endpoint: new AnthropicMessages(),
+		specification: claudeOpus55Specification,
+	},
+	{
+		endpoint: new AnthropicMessages(),
+		specification: claudeFable51Specification,
+	},
+	{
 		endpoint: new GeminiGenerateContent(),
 		specification: gemini35FlashSpecification,
 	},
@@ -58,11 +101,23 @@ export const supportedModels: GenerativeModel[] = [
 		specification: gemini31ProSpecification,
 	},
 	{
+		endpoint: new GeminiGenerateContent(),
+		specification: gemini35FlashLiteSpecification,
+	},
+	{
+		endpoint: new GeminiGenerateContent(),
+		specification: gemini38FlashSpecification,
+	},
+	{
 		endpoint: new OpenAIChatCompletions(),
 		specification: deepSeekV4FlashSpecification,
 	},
 	{
 		endpoint: new OpenAIChatCompletions(),
 		specification: deepSeekV4ProSpecification,
+	},
+	{
+		endpoint: new OpenAIChatCompletions(),
+		specification: deepSeekFlashSpecification,
 	},
 ]

@@ -6,6 +6,7 @@ import { LoopRule } from "@agent/loop/rule"
 
 export interface LoopRecord {
 	id: string
+	agentId: string
 	subject: string
 	createdAt: Date
 	state: LoopStateId
@@ -14,4 +15,5 @@ export interface LoopRecord {
 	transitionHistory: LoopTransition[]
 	operationHistory: CompletedOperation[]
 	rules: LoopRule[]
+	executionStrategy: "manual" | "auto"
 }

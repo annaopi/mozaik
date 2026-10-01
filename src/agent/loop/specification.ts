@@ -70,6 +70,12 @@ export class AwaitingInference extends LoopSpecification {
 	}
 }
 
+export class AwaitingInferenceRequest extends LoopSpecification {
+	isSatisfiedBy(agentLoop: AgentLoop) {
+		return agentLoop.loop.stateId === "awaiting_inference_request"
+	}
+}
+
 export class AwaitingToolOutput extends LoopSpecification {
 	isSatisfiedBy(agentLoop: AgentLoop) {
 		return agentLoop.loop.stateId === "awaiting_tool_output"

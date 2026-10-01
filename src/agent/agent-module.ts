@@ -24,7 +24,6 @@ import { LoopStateUseCase } from "src/mozaik/use-cases/loop-state"
 import { LoopSpecification, ModelAnswered } from "./loop/specification"
 import { CompleteAction, InferenceAction, LoopAction, ToolUseAction } from "./loop/action"
 import { CreateLoopRuleParams, LoopRule } from "./loop/rule"
-import { RuntimeEvent } from "@environment/index"
 
 export type InferenceRunnerConfig = {
 	supportedModels?: GenerativeModel[]
@@ -73,12 +72,14 @@ export function createAgentModule(config: AgentFamilyConfig) {
 
 	type CreateLoopParams = {
 		subject: string
+		agentId: string
 		rules: CreateLoopRuleParams[]
+		executionStrategy: "manual" | "auto"
 	}
 
-	async function createLoop(config: CreateLoopParams): Promise<Loop> {
-		const rules = config.rules.map((rule) => LoopRule.create(rule))
-		return await createLoopUseCase.execute(config.subject, rules)
+	async function createLoop(params: CreateLoopParams): Promise<Loop> {
+		const rules = params.rules.map((rule) => LoopRule.create(rule))
+		return await createLoopUseCase.execute(params.subject, params.agentId, rules, params.executionStrategy)
 	}
 
 	const advanceLoopUseCase = new AdvanceLoopUseCase(
@@ -89,8 +90,8 @@ export function createAgentModule(config: AgentFamilyConfig) {
 		uuidGenerator,
 		clock,
 	)
-	async function advanceLoop(agentId: string, loopId: string): Promise<LoopAdvance> {
-		return await advanceLoopUseCase.execute(agentId, loopId)
+	async function advanceLoop(agentId: string, loopId: string): Promise<void> {
+		await advanceLoopUseCase.execute(agentId, loopId)
 	}
 
 	const getLoopStateUseCase = new LoopStateUseCase()
@@ -102,8 +103,8 @@ export function createAgentModule(config: AgentFamilyConfig) {
 		return new ModelAnswered()
 	}
 
-	function inference(request: InferenceRequest): LoopAction {
-		return new InferenceAction(request)
+	function runInference(): LoopAction {
+		return new InferenceAction()
 	}
 
 	function toolUse(): LoopAction {
@@ -120,7 +121,7 @@ export function createAgentModule(config: AgentFamilyConfig) {
 		advanceLoop,
 		state,
 		modelAnswered,
-		inference,
+		runInference,
 		toolUse,
 		complete,
 	}

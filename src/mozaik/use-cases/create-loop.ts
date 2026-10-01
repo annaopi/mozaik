@@ -12,8 +12,13 @@ export class CreateAgentLoopUseCase {
 		private readonly clock: Clock,
 	) {}
 
-	async execute(subject: string, rules: LoopRule[]): Promise<Loop> {
-		const loop = Loop.create(this.ids.generate(), subject, this.clock.now(), rules)
+	async execute(
+		subject: string,
+		agentId: string,
+		rules: LoopRule[],
+		executionStrategy: "manual" | "auto",
+	): Promise<Loop> {
+		const loop = Loop.create(this.ids.generate(), agentId, subject, this.clock.now(), rules, executionStrategy)
 		await this.loopRepository.save(loop)
 		return loop
 	}

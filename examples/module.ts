@@ -5,4 +5,5 @@ const agentModule = createAgentModule({
 	toolRunner: new LocalToolRunner(),
 })
 
-export const { createAgent, createLoop, advanceLoop, state, modelAnswered, inference, toolUse, complete } = agentModule
+export const { createAgent, createLoop, advanceLoop, state, modelAnswered, runInference, toolUse, complete } =
+	agentModule

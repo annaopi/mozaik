@@ -1,6 +1,7 @@
 import { LoopStateId } from "@agent/loop"
 import {
 	AwaitingInference,
+	AwaitingInferenceRequest,
 	AwaitingToolOutput,
 	Completed,
 	Idle,
@@ -12,6 +13,9 @@ export class LoopStateUseCase {
 	execute(loopStateId: LoopStateId): LoopSpecification {
 		if (loopStateId === "idle") {
 			return new Idle()
+		}
+		if (loopStateId === "awaiting_inference_request") {
+			return new AwaitingInferenceRequest()
 		}
 		if (loopStateId === "awaiting_inference") {
 			return new AwaitingInference()

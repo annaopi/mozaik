@@ -5,10 +5,17 @@ import { LoopTransition } from "@agent/loop/transition"
 import { LoopRecord } from "@agent/loop/record"
 import { LoopRule } from "./rule"
 
-export type LoopStateId = "idle" | "awaiting_inference" | "awaiting_tool_output" | "stopped" | "completed"
+export type LoopStateId =
+	| "idle"
+	| "awaiting_inference_request"
+	| "awaiting_inference"
+	| "awaiting_tool_output"
+	| "stopped"
+	| "completed"
 
 export class Loop {
 	private readonly loopId: string
+	private readonly agentId: string
 	private readonly subject: string
 	private readonly createdAt: Date
 	private state: LoopStateId
@@ -17,9 +24,11 @@ export class Loop {
 	private inferenceRequest: InferenceRequest | undefined
 	private readonly operationHistory: CompletedOperation[]
 	private readonly loopRules: LoopRule[]
+	private readonly executionStrategy: "manual" | "auto"
 
 	private constructor(
 		loopId: string,
+		agentId: string,
 		subject: string,
 		createdAt: Date,
 		state: LoopStateId,
@@ -28,8 +37,10 @@ export class Loop {
 		transitionHistory: LoopTransition[],
 		operationHistory: CompletedOperation[],
 		rules: LoopRule[],
+		executionStrategy: "manual" | "auto",
 	) {
 		this.loopId = loopId
+		this.agentId = agentId
 		this.subject = subject
 		this.createdAt = createdAt
 		this.state = state
@@ -38,6 +49,7 @@ export class Loop {
 		this.transitionHistory = transitionHistory
 		this.operationHistory = operationHistory
 		this.loopRules = rules
+		this.executionStrategy = executionStrategy
 	}
 
 	get id(): string {
@@ -60,13 +72,22 @@ export class Loop {
 		return this.operationHistory
 	}
 
+	get request(): InferenceRequest | undefined {
+		return this.inferenceRequest
+	}
+
 	get rules(): readonly LoopRule[] {
 		return this.loopRules
+	}
+
+	get strategy(): "manual" | "auto" {
+		return this.executionStrategy
 	}
 
 	record(): LoopRecord {
 		return {
 			id: this.id,
+			agentId: this.agentId,
 			subject: this.subject,
 			createdAt: this.createdAt,
 			state: this.state,
@@ -75,6 +96,7 @@ export class Loop {
 			transitionHistory: [...this.transitionHistory],
 			operationHistory: [...this.operationHistory],
 			rules: [...this.rules],
+			executionStrategy: this.executionStrategy,
 		}
 	}
 
@@ -84,7 +106,7 @@ export class Loop {
 	}
 
 	moveToAwaitingInference(operation: PendingInference, occurredAt: Date): void {
-		this.assertIdle()
+		this.assertAwaitingInferenceRequest()
 		this.pendingOperation = operation
 
 		this.transitionTo("awaiting_inference", "inference_requested", occurredAt, operation.id)
@@ -98,7 +120,7 @@ export class Loop {
 	}
 
 	requestInference(operationId: string, request: InferenceRequest, requestedAt: Date): PendingInference {
-		this.assertIdle()
+		this.assertAwaitingInferenceRequest()
 		this.inferenceRequest = request
 		const operation: PendingInference = {
 			id: operationId,
@@ -143,6 +165,12 @@ export class Loop {
 	private assertIdle(): void {
 		if (this.state !== "idle") {
 			throw new Error(`Expected idle loop, but loop is ${this.state}`)
+		}
+	}
+
+	private assertAwaitingInferenceRequest(): void {
+		if (this.state !== "awaiting_inference_request") {
+			throw new Error(`Expected awaiting inference request loop, but loop is ${this.state}`)
 		}
 	}
 
@@ -218,7 +246,7 @@ export class Loop {
 
 		this.pendingOperation = undefined
 
-		this.transitionTo("idle", "tool_use_completed.", occurredAt, operationId)
+		this.transitionTo("awaiting_inference_request", "tool_use_completed", occurredAt, operationId)
 	}
 
 	complete(reason: string, occurredAt: Date): void {
@@ -239,13 +267,33 @@ export class Loop {
 		}
 	}
 
-	static create(id: string, subject: string, createdAt: Date, rules: LoopRule[]): Loop {
-		return new Loop(id, subject, createdAt, "idle", undefined, undefined, [], [], rules)
+	static create(
+		id: string,
+		agentId: string,
+		subject: string,
+		createdAt: Date,
+		rules: LoopRule[],
+		executionStrategy: "manual" | "auto",
+	): Loop {
+		return new Loop(
+			id,
+			agentId,
+			subject,
+			createdAt,
+			"awaiting_inference_request",
+			undefined,
+			undefined,
+			[],
+			[],
+			rules,
+			executionStrategy,
+		)
 	}
 
 	static rehydrate(record: LoopRecord): Loop {
 		return new Loop(
 			record.id,
+			record.agentId,
 			record.subject,
 			record.createdAt,
 			record.state,
@@ -254,6 +302,7 @@ export class Loop {
 			[...record.transitionHistory],
 			[...record.operationHistory],
 			[...record.rules],
+			record.executionStrategy,
 		)
 	}
 }

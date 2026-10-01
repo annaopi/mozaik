@@ -28,7 +28,7 @@ export class AdvanceLoopUseCase {
 		this.ruleEngine = new RuleEngine()
 	}
 
-	private async advanceLoop(agent: Agent, loop: Loop) {
+	private async iterateLoop(agent: Agent, loop: Loop) {
 		const directive = this.ruleEngine.decide(agent, loop)
 
 		if (!directive) {
@@ -55,21 +55,22 @@ export class AdvanceLoopUseCase {
 		}
 	}
 
-	async execute(agentId: string, loopId: string): Promise<Loop> {
-		const agent = await this.agentRepository.getById(agentId)
-		if (!agent) {
-			throw new Error("Agent not found")
-		}
+	async execute(loopId: string): Promise<Loop> {
 		const loop = await this.loopRepository.getById(loopId)
 		if (!loop) {
 			throw new Error("Loop not found")
 		}
 
+		const agent = await this.agentRepository.getById(loop.getAgentId())
+		if (!agent) {
+			throw new Error("Agent not found")
+		}
+
 		if (loop.strategy === "manual") {
-			await this.advanceLoop(agent, loop)
+			await this.iterateLoop(agent, loop)
 		} else {
 			while (loop.stateId !== "completed") {
-				await this.advanceLoop(agent, loop)
+				await this.iterateLoop(agent, loop)
 			}
 		}
 

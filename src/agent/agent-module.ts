@@ -6,7 +6,7 @@ import { SituationHandler } from "@environment/situation-handler"
 import { CreateAgentLoopUseCase } from "src/mozaik/use-cases/create-loop"
 import { SystemClock } from "@util/system-clock"
 import { InMemoryLoopRepository } from "src/mozaik/repositories/in-memory-loop-repository"
-import { InferenceRequest, InferenceRunner } from "@inference/inference-runner"
+import { InferenceRunner } from "@inference/inference-runner"
 import { AgentRepository } from "@agent/agent-repository"
 import { LoopRepository } from "@agent/loop/repository"
 import { Clock } from "@util/clock"
@@ -90,8 +90,9 @@ export function createAgentModule(config: AgentFamilyConfig) {
 		uuidGenerator,
 		clock,
 	)
-	async function advanceLoop(agentId: string, loopId: string): Promise<void> {
-		await advanceLoopUseCase.execute(agentId, loopId)
+
+	async function advanceLoop(loopId: string): Promise<void> {
+		await advanceLoopUseCase.execute(loopId)
 	}
 
 	const getLoopStateUseCase = new LoopStateUseCase()

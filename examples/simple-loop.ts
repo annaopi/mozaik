@@ -68,10 +68,10 @@ async function run() {
 				then: complete(),
 			},
 		],
-		executionStrategy: "manual",
+		executionStrategy: "auto",
 	})
 
-	await advanceLoop(agent.id, loop.id)
+	await advanceLoop(loop.id)
 
 	console.log("loop state:", loop.stateId)
 	console.log("completed operations:", loop.completedOperations.length)

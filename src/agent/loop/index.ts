@@ -84,6 +84,10 @@ export class Loop {
 		return this.executionStrategy
 	}
 
+	getAgentId(): string {
+		return this.agentId
+	}
+
 	record(): LoopRecord {
 		return {
 			id: this.id,

@@ -13,7 +13,7 @@
 		"baseUrl": ".",
 		"paths": {
 			"@agent/*": ["src/agent/*"],
-			"@environment/*": ["src/environment/*"],
+			"@environment/*": ["src/space/*"],
 			"@inference/*": ["src/inference/*"],
 			"@providers/*": ["src/providers/*"],
 			"@util/*": ["src/util/*"]
@@ -22,6 +22,6 @@
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true
 	},
-	"include": ["src", "src/environment/domain/types", "examples"],
+	"include": ["src", "src/space/domain/types", "examples"],
 	"exclude": ["node_modules", "dist"] // For now excluded tests
 }

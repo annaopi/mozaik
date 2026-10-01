@@ -1,5 +1,5 @@
-import { Participant, ParticipantManifest } from "@environment/participant"
-import { SituationHandler } from "@environment/situation-handler"
+import { Participant, ParticipantManifest } from "src/space/participant"
+import { SituationHandler } from "src/space/situation-handler"
 import { IdGenerator } from "@util/id-generator"
 
 export class CreateParticipantUseCase {

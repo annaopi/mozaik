@@ -1,21 +1,21 @@
-import { MessageSentEvent, ParticipantJoinedEvent, ParticipantLeftEvent, RuntimeEvent } from "@environment/event"
-import { Participant } from "@environment/participant"
+import { MessageSentEvent, ParticipantJoinedEvent, ParticipantLeftEvent, SpaceEvent } from "src/space/event"
+import { Participant } from "src/space/participant"
 
-export type EnvironmentRecord = {
+export type SpaceRecord = {
 	id: string
 	name: string
 	ownerId: string
 	participants: Participant[]
 }
 
-export class Environment {
+export class Space {
 	private readonly id: string
 	private readonly ownerId: string
 	private name: string
 	private participants: Participant[]
-	private events: RuntimeEvent[]
+	private events: SpaceEvent[]
 
-	constructor(id: string, name: string, ownerId: string, participants: Participant[], events: RuntimeEvent[] = []) {
+	constructor(id: string, name: string, ownerId: string, participants: Participant[], events: SpaceEvent[] = []) {
 		this.id = id
 		this.ownerId = ownerId
 		this.name = name
@@ -35,7 +35,7 @@ export class Environment {
 		return this.ownerId
 	}
 
-	addParticipant(participant: Participant, occurredAt: Date): RuntimeEvent | undefined {
+	addParticipant(participant: Participant, occurredAt: Date): SpaceEvent | undefined {
 		const alreadyExists = this.participants.find((p) => p.getId() === participant.getId())
 
 		if (alreadyExists) return
@@ -54,7 +54,7 @@ export class Environment {
 		return participant
 	}
 
-	removeParticipant(participant: Participant, occurredAt: Date): RuntimeEvent {
+	removeParticipant(participant: Participant, occurredAt: Date): SpaceEvent {
 		this.participants = this.participants.filter((p) => p.getId() !== participant.getId())
 
 		return ParticipantLeftEvent.init(participant.getManifest(), occurredAt)
@@ -64,21 +64,21 @@ export class Environment {
 		return [...this.participants]
 	}
 
-	sendMessage(participant: Participant, message: string, occurredAt: Date): RuntimeEvent {
+	sendMessage(participant: Participant, message: string, occurredAt: Date): SpaceEvent {
 		const event = MessageSentEvent.init(participant.getId(), message, occurredAt)
 		this.events.push(event)
 		return event
 	}
 
-	getEvents(): RuntimeEvent[] {
+	getEvents(): SpaceEvent[] {
 		return [...this.events]
 	}
 
-	static create(id: string, name: string, ownerId: string, participants: Participant[] = []): Environment {
-		return new Environment(id, name, ownerId, participants)
+	static create(id: string, name: string, ownerId: string, participants: Participant[] = []): Space {
+		return new Space(id, name, ownerId, participants)
 	}
 
-	get record(): EnvironmentRecord {
+	get record(): SpaceRecord {
 		return {
 			id: this.id,
 			name: this.name,
@@ -87,7 +87,7 @@ export class Environment {
 		}
 	}
 
-	static rehydrate({ id, name, ownerId, participants }: EnvironmentRecord): Environment {
-		return new Environment(id, name, ownerId, participants)
+	static rehydrate({ id, name, ownerId, participants }: SpaceRecord): Space {
+		return new Space(id, name, ownerId, participants)
 	}
 }

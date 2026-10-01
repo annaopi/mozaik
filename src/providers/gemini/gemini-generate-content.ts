@@ -1,4 +1,4 @@
-import { RuntimeEvent } from "@environment/event"
+import { SpaceEvent } from "src/space/event"
 import { GoogleGenAI } from "@google/genai"
 import type { Endpoint } from "@inference/endpoint"
 import type { InferenceRequest, InferenceResult } from "@inference/inference-runner"
@@ -45,11 +45,11 @@ export class GeminiGenerateContent implements Endpoint {
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(inferenceRequest: InferenceRequest): AsyncIterable<RuntimeEvent> {
+	async *stream(inferenceRequest: InferenceRequest): AsyncIterable<SpaceEvent> {
 		const request = this.endpointMapper.toRequest(inferenceRequest)
 		const stream: any = await this.client.models.generateContentStream(request)
 
-		let lastEvent: RuntimeEvent | undefined = undefined
+		let lastEvent: SpaceEvent | undefined = undefined
 		for await (const chunk of stream) {
 			lastEvent = chunk
 			yield chunk

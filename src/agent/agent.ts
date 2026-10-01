@@ -1,9 +1,9 @@
 import { Memory } from "@agent/memory"
-import { Participant, ParticipantManifest } from "@environment/participant"
+import { Participant, ParticipantManifest } from "src/space/participant"
 import { Tool } from "@inference/tool"
-import { SituationHandler } from "@environment/situation-handler"
+import { SituationHandler } from "src/space/situation-handler"
 import { AgentRecord } from "@agent/record"
-import { RuntimeEvent } from "@environment/event"
+import { SpaceEvent } from "src/space/event"
 
 export class Agent extends Participant {
 	private memory: Memory

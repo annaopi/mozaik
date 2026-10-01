@@ -1,8 +1,8 @@
-import { RuntimeEvent } from "./event"
+import { SpaceEvent } from "./event"
 import { Participant } from "./participant"
 
 export class EventPublisher {
-	publish(event: RuntimeEvent, participants: Participant[]): void {
+	publish(event: SpaceEvent, participants: Participant[]): void {
 		for (const participant of participants) {
 			participant.getHandlers().forEach((handler) => {
 				if (handler.specification.isSatisfiedBy({ event, participant })) {

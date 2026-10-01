@@ -1,13 +1,16 @@
 import { SpaceRepository } from "src/space/space-repository"
 import { EventPublisher } from "src/space/event-publisher"
 
-export class SendMessageUseCase {
-	constructor(
-		private readonly spaceRepository: SpaceRepository,
-		private readonly eventPublisher: EventPublisher,
-	) {}
+export class ParticipantLefUseCase {
+	private readonly spaceRepository: SpaceRepository
+	private readonly eventPublisher: EventPublisher
 
-	async execute(spaceId: string, participantId: string, message: string): Promise<void> {
+	constructor(spaceRepository: SpaceRepository, eventPublisher: EventPublisher) {
+		this.spaceRepository = spaceRepository
+		this.eventPublisher = eventPublisher
+	}
+
+	async execute(spaceId: string, participantId: string, occurredAt: Date): Promise<void> {
 		const space = await this.spaceRepository.getById(spaceId)
 		if (!space) {
 			throw new Error("Space not found")
@@ -16,7 +19,7 @@ export class SendMessageUseCase {
 		if (!participant) {
 			throw new Error("Participant not found")
 		}
-		const event = space.sendMessage(participant, message, new Date())
+		const event = space.removeParticipant(participant, occurredAt)
 		if (event) {
 			this.eventPublisher.publish(event, space.getParticipants())
 		}

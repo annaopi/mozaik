@@ -1,5 +1,5 @@
 import { InferenceRequest, InferenceResult } from "@inference/inference-runner"
-import { RuntimeEvent } from "@environment/event"
+import { SpaceEvent } from "src/space/event"
 import type { Endpoint } from "@inference/endpoint"
 import type { InferenceEndpointMapper } from "@inference/inference-endpoint-mapper"
 import { OpenAIChatCompletionsMapper } from "@providers/openai/openai-chat-completions-mapper"
@@ -80,11 +80,11 @@ export class OpenAIChatCompletions implements Endpoint {
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(inferenceRequest: InferenceRequest): AsyncIterable<RuntimeEvent> {
+	async *stream(inferenceRequest: InferenceRequest): AsyncIterable<SpaceEvent> {
 		const stream = this.client.chat.completions.stream(this.buildRequest(inferenceRequest))
 
 		for await (const chunk of stream) {
-			yield chunk as unknown as RuntimeEvent
+			yield chunk as unknown as SpaceEvent
 		}
 
 		const output = this.endpointMapper.toResponse(await stream.finalChatCompletion())

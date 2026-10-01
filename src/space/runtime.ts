@@ -1,4 +1,4 @@
-import { SharedState } from "@environment/shared-state"
+import { SharedState } from "src/space/shared-state"
 
 export class RuntimeService<TSharedState extends SharedState> {
 	constructor(public readonly state: TSharedState) {}

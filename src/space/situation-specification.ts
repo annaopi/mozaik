@@ -1,12 +1,12 @@
-import { RuntimeEvent } from "@environment/event"
-import { Participant } from "@environment/participant"
+import { SpaceEvent } from "src/space/event"
+import { Participant } from "src/space/participant"
 
-export type SituationContext<TEvent extends RuntimeEvent = RuntimeEvent> = {
+export type SituationContext<TEvent extends SpaceEvent = SpaceEvent> = {
 	readonly event: TEvent
 	readonly participant: Participant
 }
 
-export abstract class SituationSpecification<TEvent extends RuntimeEvent = RuntimeEvent> {
+export abstract class SituationSpecification<TEvent extends SpaceEvent = SpaceEvent> {
 	abstract isSatisfiedBy(situationContext: SituationContext<TEvent>): boolean
 
 	and(other: SituationSpecification<TEvent>): SituationSpecification<TEvent> {
@@ -22,7 +22,7 @@ export abstract class SituationSpecification<TEvent extends RuntimeEvent = Runti
 	}
 }
 
-class AndSituationSpecification<TEvent extends RuntimeEvent> extends SituationSpecification<TEvent> {
+class AndSituationSpecification<TEvent extends SpaceEvent> extends SituationSpecification<TEvent> {
 	constructor(
 		private readonly left: SituationSpecification<TEvent>,
 		private readonly right: SituationSpecification<TEvent>,
@@ -35,7 +35,7 @@ class AndSituationSpecification<TEvent extends RuntimeEvent> extends SituationSp
 	}
 }
 
-class OrSituationSpecification<TEvent extends RuntimeEvent> extends SituationSpecification<TEvent> {
+class OrSituationSpecification<TEvent extends SpaceEvent> extends SituationSpecification<TEvent> {
 	constructor(
 		private readonly left: SituationSpecification<TEvent>,
 		private readonly right: SituationSpecification<TEvent>,
@@ -48,7 +48,7 @@ class OrSituationSpecification<TEvent extends RuntimeEvent> extends SituationSpe
 	}
 }
 
-class NotSituationSpecification<TEvent extends RuntimeEvent> extends SituationSpecification<TEvent> {
+class NotSituationSpecification<TEvent extends SpaceEvent> extends SituationSpecification<TEvent> {
 	constructor(private readonly rule: SituationSpecification<TEvent>) {
 		super()
 	}

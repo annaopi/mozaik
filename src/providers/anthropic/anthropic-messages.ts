@@ -1,4 +1,4 @@
-import { RuntimeEvent } from "@environment/event"
+import { SpaceEvent } from "src/space/event"
 import type { Endpoint } from "@inference/endpoint"
 import type { InferenceRequest, InferenceResult } from "@inference/inference-runner"
 import { AnthropicMessagesMapper } from "@providers/anthropic/anthropic-messages-mapper"
@@ -42,12 +42,12 @@ export class AnthropicMessages implements Endpoint {
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(inferenceRequest: InferenceRequest): AsyncIterable<RuntimeEvent> {
+	async *stream(inferenceRequest: InferenceRequest): AsyncIterable<SpaceEvent> {
 		const request = this.endpointMapper.toRequest(inferenceRequest)
 		const stream = this.client.messages.stream(request)
 
 		for await (const event of stream) {
-			yield event as unknown as RuntimeEvent
+			yield event as unknown as SpaceEvent
 		}
 
 		const output = this.endpointMapper.toResponse(await stream.finalMessage())

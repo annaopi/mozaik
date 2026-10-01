@@ -1,4 +1,4 @@
-import { RuntimeEvent } from "@environment/event"
+import { SpaceEvent } from "src/space/event"
 import { InferenceRequest, InferenceResult } from "@inference/inference-runner"
 import type { Endpoint } from "@inference/endpoint"
 import { OpenAIResponsesMapper } from "@providers/openai/openai-responses-mapper"
@@ -24,7 +24,7 @@ export class OpenAIResponses implements Endpoint {
 		return this.endpointMapper.toResponse(response)
 	}
 
-	async *stream(inferenceRequest: InferenceRequest): AsyncIterable<RuntimeEvent> {
+	async *stream(inferenceRequest: InferenceRequest): AsyncIterable<SpaceEvent> {
 		const request = this.endpointMapper.toRequest(inferenceRequest)
 		const stream: any = await this.client.responses.create({ ...request, stream: true })
 

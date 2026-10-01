@@ -1,7 +1,7 @@
 import { Tool } from "@inference/tool"
-import { ParticipantManifest } from "@environment/participant"
+import { ParticipantManifest } from "src/space/participant"
 import { Memory } from "./memory"
-import { SituationHandler } from "@environment/situation-handler"
+import { SituationHandler } from "src/space/situation-handler"
 
 export type AgentRecord = {
 	id: string

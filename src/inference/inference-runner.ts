@@ -1,4 +1,4 @@
-import { RuntimeEvent } from "@environment/event"
+import { SpaceEvent } from "src/space/event"
 import { Context } from "@inference/context"
 import { StructuredOutputFormat } from "@inference/request-validation/structured-output"
 import { TokenUsage } from "@inference/token-usage"
@@ -23,5 +23,5 @@ export type InferenceResult = {
 
 export interface InferenceRunner {
 	run(request: InferenceRequest): Promise<InferenceResult>
-	stream(request: InferenceRequest): AsyncGenerator<RuntimeEvent>
+	stream(request: InferenceRequest): AsyncGenerator<SpaceEvent>
 }

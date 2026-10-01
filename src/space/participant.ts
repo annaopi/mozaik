@@ -1,5 +1,5 @@
-import { SituationHandler } from "@environment/situation-handler"
-import { RuntimeEvent } from "./event"
+import { SituationHandler } from "src/space/situation-handler"
+import { SpaceEvent } from "./event"
 
 export type ParticipantRole = "agent" | "external"
 

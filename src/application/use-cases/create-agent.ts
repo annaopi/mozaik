@@ -2,20 +2,18 @@ import { Agent } from "@domain/agent/agent"
 import { Tool } from "@domain/inference/tool"
 import { SituationHandler } from "@domain/space/situation-handler"
 import { AgentRepository } from "@domain/agent/agent-repository"
-import { IdGenerator } from "@util/id-generator"
 import { ParticipantManifest } from "@domain/space/participant"
 import { DeveloperMessageItem } from "@domain/inference/context"
 import { AgentRecord } from "@domain/agent/record"
 import { MemoryFactory } from "@domain/agent/memory"
+import { UuidGenerator } from "@util/uuid-generator"
 
 export class CreateAgentUseCase {
 	private readonly agentRepository: AgentRepository
-	private readonly ids: IdGenerator
 	private readonly memoryFactory: MemoryFactory
 
-	constructor(agentRepository: AgentRepository, ids: IdGenerator, memoryFactory: MemoryFactory) {
+	constructor(agentRepository: AgentRepository, memoryFactory: MemoryFactory) {
 		this.agentRepository = agentRepository
-		this.ids = ids
 		this.memoryFactory = memoryFactory
 	}
 
@@ -25,7 +23,7 @@ export class CreateAgentUseCase {
 		tools: Tool[],
 		handlers: SituationHandler[],
 	): Promise<AgentRecord> {
-		const id = this.ids.generate()
+		const id = UuidGenerator.create()
 		const manifest: ParticipantManifest = { id, name, role: "agent" }
 		const memory = this.memoryFactory.create()
 		const developerMessageItem: DeveloperMessageItem = {

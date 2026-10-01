@@ -9,6 +9,8 @@ import {
 import { LoopTransition } from "@domain/agent/loop/transition"
 import { LoopRecord } from "@domain/agent/loop/record"
 import { LoopRule } from "./rule"
+import { SystemClock } from "@util/system-clock"
+import { UuidGenerator } from "@util/uuid-generator"
 
 export type LoopStateId =
 	| "idle"
@@ -109,36 +111,37 @@ export class Loop {
 		}
 	}
 
-	moveToIdle(reason: string, occurredAt: Date, transitionId: string): void {
-		this.transitionTo("idle", reason, occurredAt, transitionId)
+	moveToIdle(reason: string, transitionId: string): void {
+		const occurredAt = SystemClock.now()
+		this.transitionTo("idle", reason, transitionId)
 		this.pendingOperation = undefined
 	}
 
-	moveToAwaitingInference(operation: PendingInference, occurredAt: Date): void {
+	moveToAwaitingInference(operation: PendingInference): void {
 		this.assertAwaitingInferenceRequest()
 		this.pendingOperation = operation
 
-		this.transitionTo("awaiting_inference", "inference_requested", occurredAt, operation.id)
+		this.transitionTo("awaiting_inference", "inference_requested", operation.id)
 	}
 
 	moveToAwaitingToolOutput(operation: Extract<PendingOperation, { type: "tool_execution" }>, occurredAt: Date): void {
 		this.assertIdle()
 		this.pendingOperation = operation
 
-		this.transitionTo("awaiting_tool_output", "tool_execution_requested", occurredAt, operation.id)
+		this.transitionTo("awaiting_tool_output", "tool_execution_requested", operation.id)
 	}
 
-	requestInference(operationId: string, request: InferenceRequest, requestedAt: Date): PendingInference {
+	requestInference(request: InferenceRequest): PendingInference {
 		this.assertAwaitingInferenceRequest()
 		this.inferenceRequest = request
 		const operation: PendingInference = {
-			id: operationId,
+			id: UuidGenerator.create(),
 			type: "inference",
-			requestedAt,
+			requestedAt: SystemClock.now(),
 			request: this.inferenceRequest,
 		}
 
-		this.moveToAwaitingInference(operation, requestedAt)
+		this.moveToAwaitingInference(operation)
 
 		return operation
 	}
@@ -158,7 +161,8 @@ export class Loop {
 		return operation
 	}
 
-	private transitionTo(nextState: LoopStateId, reason: string, occurredAt: Date, operationId?: string): void {
+	private transitionTo(nextState: LoopStateId, reason: string, operationId?: string): void {
+		const occurredAt = SystemClock.now()
 		const previousState = this.state
 		this.state = nextState
 
@@ -183,7 +187,7 @@ export class Loop {
 		}
 	}
 
-	receiveInferenceResult(operationId: string, result: InferenceResult, occurredAt: Date): void {
+	receiveInferenceResult(operationId: string, result: InferenceResult): void {
 		if (this.state !== "awaiting_inference") {
 			throw new Error(`Cannot receive inference result while loop is ${this.state}`)
 		}
@@ -197,13 +201,13 @@ export class Loop {
 		if (!this.inferenceRequest) {
 			throw new Error("Inference request is not provided")
 		}
-		this.moveToIdle("inference_completed", occurredAt, operationId)
+		this.moveToIdle("inference_completed", operationId)
 
 		this.operationHistory.push({
 			type: "inference",
 			operationId,
 			requestedAt: operation.requestedAt,
-			completedAt: occurredAt,
+			completedAt: SystemClock.now(),
 			request: operation.request,
 			result,
 		})
@@ -216,18 +220,18 @@ export class Loop {
 			this.pendingOperation = {
 				id: call.requestId,
 				type: "tool_execution",
-				requestedAt: occurredAt,
+				requestedAt: SystemClock.now(),
 				call,
 			}
 
-			this.transitionTo("awaiting_tool_output", "tool_use_requested", occurredAt, call.requestId)
+			this.transitionTo("awaiting_tool_output", "tool_use_requested", call.requestId)
 			return
 		}
 
 		this.pendingOperation = undefined
 	}
 
-	receiveToolUseResult(operationId: string, result: ToolUseResult, occurredAt: Date): void {
+	receiveToolUseResult(operationId: string, result: ToolUseResult): void {
 		if (this.state !== "awaiting_tool_output") {
 			throw new Error(`Cannot receive tool output while loop is ${this.state}`)
 		}
@@ -246,7 +250,7 @@ export class Loop {
 			type: "tool_use",
 			operationId,
 			requestedAt: operation.requestedAt,
-			completedAt: occurredAt,
+			completedAt: SystemClock.now(),
 			call: operation.call,
 			result,
 		})
@@ -255,19 +259,19 @@ export class Loop {
 
 		this.pendingOperation = undefined
 
-		this.transitionTo("awaiting_inference_request", "tool_use_completed", occurredAt, operationId)
+		this.transitionTo("awaiting_inference_request", "tool_use_completed", operationId)
 	}
 
-	complete(reason: string, occurredAt: Date): void {
+	complete(reason: string): void {
 		this.assertNotSettled("complete")
 		this.pendingOperation = undefined
-		this.transitionTo("completed", reason, occurredAt)
+		this.transitionTo("completed", reason)
 	}
 
-	stop(reason: string, occurredAt: Date): void {
+	stop(reason: string): void {
 		this.assertNotSettled("stop")
 		this.pendingOperation = undefined
-		this.transitionTo("stopped", reason, occurredAt)
+		this.transitionTo("stopped", reason)
 	}
 
 	private assertNotSettled(intent: string): void {

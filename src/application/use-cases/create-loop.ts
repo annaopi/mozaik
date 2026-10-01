@@ -1,16 +1,11 @@
-import { Loop } from "@domain/agent/loop"
+import { Loop } from "@domain/agent/loop/loop"
 import { LoopRepository } from "@domain/agent/loop/repository"
-import { AgentRepository } from "@domain/agent/agent-repository"
-import { Clock } from "@util/clock"
-import { IdGenerator } from "@util/id-generator"
 import { LoopRule } from "@domain/agent/loop/rule"
+import { SystemClock } from "@util/system-clock"
+import { UuidGenerator } from "@util/uuid-generator"
 
 export class CreateAgentLoopUseCase {
-	constructor(
-		private readonly loopRepository: LoopRepository,
-		private readonly ids: IdGenerator,
-		private readonly clock: Clock,
-	) {}
+	constructor(private readonly loopRepository: LoopRepository) {}
 
 	async execute(
 		subject: string,
@@ -18,7 +13,7 @@ export class CreateAgentLoopUseCase {
 		rules: LoopRule[],
 		executionStrategy: "manual" | "auto",
 	): Promise<Loop> {
-		const loop = Loop.create(this.ids.generate(), agentId, subject, this.clock.now(), rules, executionStrategy)
+		const loop = Loop.create(UuidGenerator.create(), agentId, subject, SystemClock.now(), rules, executionStrategy)
 		await this.loopRepository.save(loop)
 		return loop
 	}

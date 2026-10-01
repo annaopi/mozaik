@@ -3,7 +3,6 @@ import { Participant, ParticipantManifest } from "@domain/space/participant"
 import { Tool } from "@domain/inference/tool"
 import { SituationHandler } from "@domain/space/situation-handler"
 import { AgentRecord } from "@domain/agent/record"
-import { SpaceEvent } from "@domain/space/event"
 
 export class Agent extends Participant {
 	private memory: Memory

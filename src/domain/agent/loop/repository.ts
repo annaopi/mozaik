@@ -1,4 +1,4 @@
-import { Loop } from "@domain/agent/loop"
+import { Loop } from "@domain/agent/loop/loop"
 
 export interface LoopRepository {
 	save(loop: Loop): Promise<void>

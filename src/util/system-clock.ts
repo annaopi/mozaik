@@ -1,7 +1,5 @@
-import { Clock } from "@util/clock"
-
-export class SystemClock implements Clock {
-	now(): Date {
+export class SystemClock {
+	static now(): Date {
 		return new Date()
 	}
 }

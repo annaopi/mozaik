@@ -1,4 +1,4 @@
-import { Loop } from "@domain/agent/loop"
+import { Loop } from "@domain/agent/loop/loop"
 import { LoopRepository } from "@domain/agent/loop/repository"
 
 export class InMemoryLoopRepository implements LoopRepository {

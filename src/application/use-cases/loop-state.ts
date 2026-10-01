@@ -1,4 +1,4 @@
-import { LoopStateId } from "@domain/agent/loop"
+import { LoopStateId } from "@domain/agent/loop/loop"
 import {
 	AwaitingInference,
 	AwaitingInferenceRequest,

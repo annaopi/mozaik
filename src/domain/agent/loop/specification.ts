@@ -1,5 +1,5 @@
 import { Agent } from "@domain/agent/agent"
-import { Loop } from "@domain/agent/loop"
+import { Loop } from "@domain/agent/loop/loop"
 
 export type AgentLoop = {
 	readonly agent: Agent

@@ -1,4 +1,4 @@
-import { LoopStateId } from "@domain/agent/loop"
+import { LoopStateId } from "@domain/agent/loop/loop"
 
 export interface LoopTransition {
 	readonly occurredAt: Date

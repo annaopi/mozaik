@@ -9,8 +9,6 @@ import { InMemoryLoopRepository } from "@infrastructure/repositories/in-memory-l
 import { InferenceRunner } from "@domain/inference/inference-runner"
 import { AgentRepository } from "@domain/agent/agent-repository"
 import { LoopRepository } from "@domain/agent/loop/repository"
-import { Clock } from "@util/clock"
-import { IdGenerator } from "@util/id-generator"
 import { ToolUseRunner } from "@domain/inference/tool-use-runner"
 import { LocalToolRunner } from "@application/runners/local-tool-runner"
 import { DefaultInferenceRunner } from "@application/runners/inference-runner"
@@ -18,7 +16,7 @@ import { GenerativeModel } from "@domain/inference/generative-model"
 import { InferenceRequestValidator } from "@domain/inference/request-validation/inference-request-validator"
 import { supportedModels } from "@infrastructure/providers/supported-models"
 import { AgentRecord } from "./domain/agent/record"
-import { Loop, LoopStateId } from "./domain/agent/loop"
+import { Loop, LoopStateId } from "./domain/agent/loop/loop"
 import { AdvanceLoopUseCase } from "@application/use-cases/advance-loop"
 import { LoopStateUseCase } from "@application/use-cases/loop-state"
 import { LoopSpecification, ModelAnswered } from "./domain/agent/loop/specification"
@@ -34,8 +32,6 @@ export type InferenceRunnerConfig = {
 export type AgentFamilyConfig = {
 	agentRepository?: AgentRepository
 	agentLoopRepository?: LoopRepository
-	clock?: Clock
-	uuidGenerator?: IdGenerator
 	inferenceRunnerConfig?: InferenceRunnerConfig
 	toolRunner: ToolUseRunner
 }
@@ -43,9 +39,7 @@ export type AgentFamilyConfig = {
 export function createAgentModule(config: AgentFamilyConfig) {
 	// Dependencies
 	const agentRepository = config.agentRepository ?? new InMemoryAgentRepository()
-	const uuidGenerator = config.uuidGenerator ?? new UuidGenerator()
 	const agentLoopRepository = config.agentLoopRepository ?? new InMemoryLoopRepository()
-	const clock = config.clock ?? new SystemClock()
 
 	const inferenceRunner =
 		config.inferenceRunnerConfig?.runner ??
@@ -58,8 +52,8 @@ export function createAgentModule(config: AgentFamilyConfig) {
 
 	const memoryFactory = new RuntimeMemoryFactory()
 	// Use cases
-	const createAgentUseCase = new CreateAgentUseCase(agentRepository, uuidGenerator, memoryFactory)
-	const createLoopUseCase = new CreateAgentLoopUseCase(agentLoopRepository, uuidGenerator, clock)
+	const createAgentUseCase = new CreateAgentUseCase(agentRepository, memoryFactory)
+	const createLoopUseCase = new CreateAgentLoopUseCase(agentLoopRepository)
 
 	type CreateAgentParams = {
 		name: string
@@ -84,14 +78,7 @@ export function createAgentModule(config: AgentFamilyConfig) {
 		return await createLoopUseCase.execute(params.subject, params.agentId, rules, params.executionStrategy)
 	}
 
-	const advanceLoopUseCase = new AdvanceLoopUseCase(
-		inferenceRunner,
-		toolRunner,
-		agentRepository,
-		agentLoopRepository,
-		uuidGenerator,
-		clock,
-	)
+	const advanceLoopUseCase = new AdvanceLoopUseCase(inferenceRunner, toolRunner, agentRepository, agentLoopRepository)
 
 	async function advanceLoop(loopId: string): Promise<void> {
 		await advanceLoopUseCase.execute(loopId)

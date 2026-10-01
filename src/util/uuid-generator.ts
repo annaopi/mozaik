@@ -1,7 +1,5 @@
-import { IdGenerator } from "@util/id-generator"
-
-export class UuidGenerator implements IdGenerator {
-	generate(): string {
+export class UuidGenerator {
+	static create(): string {
 		return crypto.randomUUID()
 	}
 }

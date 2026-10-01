@@ -1,12 +1,10 @@
 import { AgentRepository } from "@domain/agent/agent-repository"
-import { Loop } from "@domain/agent/loop"
+import { Loop } from "@domain/agent/loop/loop"
 import { LoopControlDirective } from "@domain/agent/loop/directive"
 import { RuleEngine } from "@domain/agent/loop/rule-book"
 import { LoopRepository } from "@domain/agent/loop/repository"
 import { InferenceRunner } from "@domain/inference/inference-runner"
 import { ToolUseRunner } from "@domain/inference/tool-use-runner"
-import { Clock } from "@util/clock"
-import { IdGenerator } from "@util/id-generator"
 import { Agent } from "@domain/agent/agent"
 
 export type LoopAdvance = {
@@ -22,8 +20,6 @@ export class AdvanceLoopUseCase {
 		private readonly toolRunner: ToolUseRunner,
 		private readonly agentRepository: AgentRepository,
 		private readonly loopRepository: LoopRepository,
-		private readonly ids: IdGenerator,
-		private readonly clock: Clock,
 	) {
 		this.ruleEngine = new RuleEngine()
 	}
@@ -36,9 +32,9 @@ export class AdvanceLoopUseCase {
 		}
 
 		if (directive.type === "inference") {
-			const pending = loop.requestInference(this.ids.generate(), directive.request, this.clock.now())
+			const pending = loop.requestInference(directive.request)
 			const result = await this.inferenceRunner.run(directive.request)
-			loop.receiveInferenceResult(pending.id, result, this.clock.now())
+			loop.receiveInferenceResult(pending.id, result)
 		} else if (directive.type === "tool_use") {
 			const pending = loop.pending
 			if (pending?.type !== "tool_execution") {
@@ -49,9 +45,9 @@ export class AdvanceLoopUseCase {
 				throw new Error(`Tool with name ${directive.call.toolName} not found`)
 			}
 			const result = await this.toolRunner.run(directive.call, tool)
-			loop.receiveToolUseResult(pending.id, result, this.clock.now())
+			loop.receiveToolUseResult(pending.id, result)
 		} else if (directive.type === "complete") {
-			loop.complete(directive.reason, this.clock.now())
+			loop.complete(directive.reason)
 		}
 	}
 

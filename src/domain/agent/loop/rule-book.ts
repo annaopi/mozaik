@@ -1,4 +1,4 @@
-import { Loop } from "@domain/agent/loop"
+import { Loop } from "@domain/agent/loop/loop"
 import { CreateLoopRuleParams, LoopRule } from "@domain/agent/loop/rule"
 import { LoopControlDirective } from "@domain/agent/loop/directive"
 import { AgentLoop } from "./specification"

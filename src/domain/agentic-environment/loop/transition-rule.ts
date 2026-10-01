@@ -19,7 +19,7 @@ export class ContextPreparationToInferenceRule implements LoopTransitionRule {
 	readonly specification = new MessageReceivedSpecification()
 
 	createTransition(execution: LoopStateExecution): LoopTransition<"inference" | "inference_streaming"> {
-		if (execution.stateId !== "context_update") {
+		if (execution.stateId !== "message_received") {
 			throw new Error("Expected context_preparation execution")
 		}
 
@@ -76,6 +76,7 @@ export class InferenceToModelMessageRule implements LoopTransitionRule {
 		if (!modelMessageItem) {
 			throw new Error("Expected inference model-message output")
 		}
+		execution.input.context.addContextItem(modelMessageItem)
 
 		return {
 			nextStateId: "model_message",

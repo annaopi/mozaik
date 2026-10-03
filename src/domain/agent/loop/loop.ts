@@ -272,14 +272,8 @@ export class Loop {
 		}
 	}
 
-	static create(
-		id: string,
-		agentId: string,
-		subject: string,
-		createdAt: Date,
-		rules: LoopRule[],
-		executionStrategy: "manual" | "auto",
-	): Loop {
+	static create(id: string, agentId: string, subject: string, rules: LoopRule[]): Loop {
+		const createdAt = SystemClock.now()
 		return new Loop(
 			id,
 			agentId,

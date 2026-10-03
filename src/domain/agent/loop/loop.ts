@@ -104,7 +104,6 @@ export class Loop {
 	}
 
 	moveToIdle(reason: string, transitionId: string): void {
-		const occurredAt = SystemClock.now()
 		this.transitionTo("idle", reason, transitionId)
 		this.pendingOperation = undefined
 	}
@@ -264,6 +263,12 @@ export class Loop {
 		this.assertNotSettled("stop")
 		this.pendingOperation = undefined
 		this.transitionTo("stopped", reason)
+	}
+
+	wait(reason: string): void {
+		this.assertNotSettled("wait")
+		this.pendingOperation = undefined
+		this.transitionTo("idle", reason)
 	}
 
 	private assertNotSettled(intent: string): void {

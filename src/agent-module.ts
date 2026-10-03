@@ -21,6 +21,11 @@ import { LoopSpecification, ModelAnswered } from "./domain/agent/loop/specificat
 import { CompleteAction, InferenceAction, LoopAction, ToolUseAction } from "./domain/agent/loop/action"
 import { CreateLoopRuleParams, LoopRule } from "./domain/agent/loop/rule"
 import { RuntimeMemoryFactory } from "@infrastructure/memory/runtime-memory-factory"
+import { DirectiveExecutionStrategyResolver } from "@application/directive-execution/directive-execution-strategy-resolver"
+import { CompleteExecutionStrategy } from "@application/directive-execution/complete-execution-strategy"
+import { InferenceExecutionStrategy } from "@application/directive-execution/inference-execution-strategy"
+import { ToolUseExecutionStrategy } from "@application/directive-execution/tool-use-execution-strategy"
+import { WaitExecutionStrategy } from "@application/directive-execution/wait-execution-strategy"
 
 export type InferenceRunnerConfig = {
 	supportedModels?: GenerativeModel[]
@@ -75,7 +80,14 @@ export function createAgentModule(config: AgentFamilyConfig) {
 		return await createLoopUseCase.execute(params.subject, params.agentId, rules)
 	}
 
-	const runLoopUseCase = new RunLoopUseCase(inferenceRunner, toolRunner, agentRepository, agentLoopRepository)
+	const directiveExecutionStrategyResolver = new DirectiveExecutionStrategyResolver({
+		inference: new InferenceExecutionStrategy(inferenceRunner),
+		tool_use: new ToolUseExecutionStrategy(toolRunner),
+		complete: new CompleteExecutionStrategy(),
+		wait: new WaitExecutionStrategy(),
+	})
+
+	const runLoopUseCase = new RunLoopUseCase(agentRepository, agentLoopRepository, directiveExecutionStrategyResolver)
 
 	async function runLoop(loopId: string): Promise<Loop> {
 		return await runLoopUseCase.execute(loopId)

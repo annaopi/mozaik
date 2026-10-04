@@ -14,7 +14,6 @@ import { gpt54MiniSpecification } from "@infrastructure/providers/openai/models/
 import { gpt54NanoSpecification } from "@infrastructure/providers/openai/models/gpt-5-4-nano"
 import { gpt55Specification } from "@infrastructure/providers/openai/models/gpt-5-5"
 import { claudeHaiku45Specification } from "@infrastructure/providers/anthropic/models/claude-4-5-haiku"
-
 import { gpt6LunaSpecification } from "@infrastructure/providers/openai/models/gpt-6-luna"
 import { gpt6SolSpecification } from "@infrastructure/providers/openai/models/gpt-6-sol"
 import { gpt61SolSpecification } from "@infrastructure/providers/openai/models/gpt-6-1-sol"

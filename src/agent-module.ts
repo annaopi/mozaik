@@ -18,7 +18,7 @@ import { Loop, LoopStateId } from "./domain/agent/loop/loop"
 import { RunLoopUseCase } from "@application/use-cases/run-loop"
 import { LoopStateUseCase } from "@application/use-cases/loop-state"
 import { LoopSpecification, ModelAnswered } from "./domain/agent/loop/specification"
-import { CompleteAction, InferenceAction, LoopAction, ToolUseAction } from "./domain/agent/loop/action"
+import { CompleteAction, InferenceAction, LoopAction, ToolUseAction, WaitAction } from "./domain/agent/loop/action"
 import { CreateLoopRuleParams, LoopRule } from "./domain/agent/loop/rule"
 import { RuntimeMemoryFactory } from "@infrastructure/memory/runtime-memory-factory"
 import { DirectiveExecutionStrategyResolver } from "@application/directive-execution/directive-execution-strategy-resolver"
@@ -32,14 +32,14 @@ export type InferenceRunnerConfig = {
 	runner?: InferenceRunner
 }
 
-export type AgentFamilyConfig = {
+export type AgentModuleConfig = {
 	agentRepository?: AgentRepository
 	agentLoopRepository?: LoopRepository
 	inferenceRunnerConfig?: InferenceRunnerConfig
-	toolRunner: ToolUseRunner
+	toolRunner?: ToolUseRunner
 }
 
-export function createAgentModule(config: AgentFamilyConfig) {
+export function defineAgentModule(config: AgentModuleConfig) {
 	// Dependencies
 	const agentRepository = config.agentRepository ?? new InMemoryAgentRepository()
 	const agentLoopRepository = config.agentLoopRepository ?? new InMemoryLoopRepository()
@@ -51,7 +51,7 @@ export function createAgentModule(config: AgentFamilyConfig) {
 			new InferenceRequestValidator(),
 		)
 
-	const toolRunner = new LocalToolRunner()
+	const toolRunner = config.toolRunner ?? new LocalToolRunner()
 
 	const memoryFactory = new RuntimeMemoryFactory()
 	// Use cases
@@ -111,7 +111,11 @@ export function createAgentModule(config: AgentFamilyConfig) {
 	}
 
 	function complete(reason?: string): LoopAction {
-		return new CompleteAction(reason ?? "loop_completed")
+		return new CompleteAction(reason ?? "completed")
+	}
+
+	function wait(reason?: string): LoopAction {
+		return new WaitAction(reason ?? "waiting")
 	}
 
 	return {
@@ -123,5 +127,6 @@ export function createAgentModule(config: AgentFamilyConfig) {
 		runInference,
 		toolUse,
 		complete,
+		wait,
 	}
 }

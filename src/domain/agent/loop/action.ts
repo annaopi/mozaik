@@ -10,7 +10,7 @@ export class InferenceAction extends LoopAction {
 		const request = agentLoop.loop.request
 
 		if (!request) {
-			return { type: "wait" }
+			return { type: "wait", reason: "no request" }
 		}
 
 		return { type: "inference", request }
@@ -47,7 +47,13 @@ export class CompleteAction extends LoopAction {
 }
 
 export class WaitAction extends LoopAction {
+	private reason: string
+
+	constructor(reason: string) {
+		super()
+		this.reason = reason
+	}
 	execute(): LoopControlDirective {
-		return { type: "wait" }
+		return { type: "wait", reason: this.reason }
 	}
 }

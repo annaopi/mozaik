@@ -2,6 +2,7 @@ import "dotenv/config"
 import { complete, state, modelAnswered, toolUse, createLoop, createAgent, runLoop, runInference } from "./module"
 import { Tool } from "@domain/inference/tool"
 import { AgentLoop } from "@domain/agent/loop/specification"
+import { LoopTransition } from "@domain/agent/loop/transition"
 import { LoopControlDirective } from "@domain/agent/loop/directive"
 import { LoopAction } from "@domain/agent/loop/action"
 
@@ -74,7 +75,7 @@ async function run() {
 
 	console.log("loop state:", loop.stateId)
 	console.log("completed operations:", loop.completedOperations.length)
-	console.log("transitions:", loop.history.map((transition) => transition.reason).join(" -> "))
+	console.log("transitions:", loop.history.map((transition: LoopTransition) => transition.reason).join(" -> "))
 
 	console.log("context:", agent.memory.getContext().items)
 }

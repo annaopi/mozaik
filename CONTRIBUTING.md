@@ -124,7 +124,7 @@ npm run test:coverage     # run with a coverage report
 Tests live under `tests/`, mirroring the layered architecture:
 
 - `tests/unit` — fast, isolated tests for a single unit of behavior (domain rules, model specifications, provider helpers). No network, file system, or real provider calls.
-- `tests/integration` — tests that exercise several units together, such as mapping a `ModelContext` through a provider runtime. These still run offline; stub the provider SDK rather than making real API calls.
+- `tests/integration` — tests that exercise several units together, such as mapping a `Context` through a provider runtime. These still run offline; stub the provider SDK rather than making real API calls.
 
 Test files use the `*.test.ts` (or `*.spec.ts`) suffix and import internal modules through the same `@domain`, `@app`, and `@infra` aliases as the source. `tests/setup.ts` seeds dummy provider credentials so runtime clients can be constructed without real secrets.
 

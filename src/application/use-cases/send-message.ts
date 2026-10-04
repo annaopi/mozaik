@@ -1,18 +1,25 @@
-import { RuntimeService } from "@app/services/runtime"
-import { RuntimeState } from "@domain/agentic-environment/runtime-state"
-import { MessageSentEvent } from "@domain/agentic-environment/semantic-event/event"
+import { SpaceRepository } from "@domain/space/space-repository"
+import { EventPublisher } from "@domain/space/event-publisher"
 
-export function createSendMessage<TRuntimeState extends RuntimeState>(
-	resolveRuntime: () => RuntimeService<TRuntimeState>,
-) {
-	return function sendMessage(message: string, senderId: string): void {
-		const runtime = resolveRuntime()
-		const participant = runtime.getParticipant(senderId)
-		if (!participant) {
-			throw new Error(`Participant ${senderId} not found`)
+export class SendMessageUseCase {
+	constructor(
+		private readonly spaceRepository: SpaceRepository,
+		private readonly eventPublisher: EventPublisher,
+	) {}
+
+	async execute(spaceId: string, participantId: string, message: string): Promise<void> {
+		const space = await this.spaceRepository.findById(spaceId)
+		if (!space) {
+			throw new Error("Space not found")
 		}
-
-		const userMessage: MessageSentEvent = MessageSentEvent.init(senderId, message)
-		runtime.publish(userMessage)
+		const participant = space.getParticipant(participantId)
+		if (!participant) {
+			throw new Error("Participant not found")
+		}
+		const event = space.sendMessage(participant, message, new Date())
+		if (event) {
+			this.eventPublisher.publish(event, space.getParticipants())
+		}
+		await this.spaceRepository.save(space)
 	}
 }

@@ -1,4 +1,4 @@
-import type { ModelSpecification } from "@domain/generative-model/generative-model"
+import type { ModelSpecification } from "@domain/inference/generative-model"
 
 export const gemini38FlashSpecification: ModelSpecification = {
 	name: "gemini-3.8-flash",

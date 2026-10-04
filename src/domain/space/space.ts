@@ -1,0 +1,95 @@
+import { MessageSentEvent, ParticipantJoinedEvent, ParticipantLeftEvent, SpaceEvent } from "@domain/space/event"
+import { Participant } from "@domain/space/participant"
+import { UuidGenerator } from "@util/uuid-generator"
+
+export type SpaceRecord = {
+	id: string
+	name: string
+	ownerId: string
+	participants: Participant[]
+}
+
+export class Space {
+	private readonly id: string
+	private readonly ownerId: string
+	private name: string
+	private participants: Participant[]
+	private events: SpaceEvent[]
+
+	constructor(id: string, name: string, ownerId: string, participants: Participant[], events: SpaceEvent[] = []) {
+		this.id = id
+		this.ownerId = ownerId
+		this.name = name
+		this.participants = participants
+		this.events = events
+	}
+
+	getId(): string {
+		return this.id
+	}
+
+	getName(): string {
+		return this.name
+	}
+
+	getOwnerId(): string {
+		return this.ownerId
+	}
+
+	addParticipant(participant: Participant, occurredAt: Date): SpaceEvent | undefined {
+		const alreadyExists = this.participants.find((p) => p.getId() === participant.getId())
+
+		if (alreadyExists) return
+
+		this.participants.push(participant)
+
+		return ParticipantJoinedEvent.init(participant.getManifest(), occurredAt)
+	}
+
+	getParticipant(id: string): Participant | undefined {
+		const participant = this.getParticipants().find((p) => p.getId() === id)
+		if (!participant) {
+			throw new Error(`Participant ${id} not found`)
+		}
+
+		return participant
+	}
+
+	removeParticipant(participant: Participant, occurredAt: Date): SpaceEvent {
+		this.participants = this.participants.filter((p) => p.getId() !== participant.getId())
+
+		return ParticipantLeftEvent.init(participant.getManifest(), occurredAt)
+	}
+
+	getParticipants(): Participant[] {
+		return [...this.participants]
+	}
+
+	sendMessage(participant: Participant, message: string, occurredAt: Date): SpaceEvent {
+		const event = MessageSentEvent.init(participant.getId(), message, occurredAt)
+		this.events.push(event)
+		return event
+	}
+
+	getEvents(): SpaceEvent[] {
+		return [...this.events]
+	}
+
+	static create(name: string, ownerId: string, participants: Participant[] = []): Space {
+		const id = UuidGenerator.create()
+		return new Space(id, name, ownerId, participants)
+	}
+
+	get record(): SpaceRecord {
+		return {
+			id: this.id,
+			name: this.name,
+			ownerId: this.ownerId,
+			participants: this.participants,
+		}
+	}
+
+	static rehydrate({ id, name, ownerId, participants }: SpaceRecord): Space {
+		return new Space(id, name, ownerId, participants)
+	}
+}

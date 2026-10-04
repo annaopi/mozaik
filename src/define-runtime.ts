@@ -1,51 +1,28 @@
-import { RuntimeService } from "@app/services/runtime"
-import { Participant } from "@domain/agentic-environment/participant/participant"
-import { RuntimeState } from "@domain/agentic-environment/runtime-state"
-import { EventProcessor } from "@domain/agentic-environment/semantic-event/event-processor"
-import { createJoin } from "./application/use-cases/join"
-import { createLeave } from "./application/use-cases/leave"
-import { createSendMessage } from "./application/use-cases/send-message"
-import { createRunLoop } from "@app/use-cases/run-loop"
-import { InferenceRunner } from "@app/states/inference"
-import { supportedModels } from "@app/services/models"
-import { GenerativeModel } from "@domain/generative-model/generative-model"
-import { InferenceInputValidator } from "@domain/generative-model/request-validation/inference-request-validator"
-import { DefaultInferenceRunner } from "@app/services/inference-runner"
-import { DefaultFunctionCallRunner } from "@app/services/function-call"
-import { createSendEvent } from "@app/use-cases/send-event"
+import { RuntimeService } from "@domain/space/runtime"
+import { SituationHandler } from "@domain/space/situation-handler"
+import { CreateParticipantUseCase } from "@application/use-cases/create-participant"
+import { SharedState } from "@domain/space/shared-state"
+import { ParticipantJoinedUseCase } from "@application/use-cases/participant-joined"
+import { InMemorySpaceRepository } from "@infrastructure/repositories/in-memory-space-repository"
+import { EventPublisher } from "@domain/space/event-publisher"
+import { ParticipantLefUseCase } from "@application/use-cases/participant-left"
+import { SendMessageUseCase } from "@application/use-cases/send-message"
+import { Tool } from "@domain/inference/tool"
 
-export type InferenceRunnerConfig = {
-	supportedModels?: GenerativeModel[]
-	runner?: InferenceRunner
-}
+export function defineRuntime<TSharedState extends SharedState>() {
+	let runtime: RuntimeService<TSharedState> | null = null
 
-export function defineRuntime<TRuntimeState extends RuntimeState>() {
-	let runtime: RuntimeService<TRuntimeState> | null = null
-	const processor = new EventProcessor()
-
-	function initializeRuntime(config: {
-		state: TRuntimeState
-		inferenceRunnerConfig?: InferenceRunnerConfig
-	}): RuntimeService<TRuntimeState> {
+	function initializeRuntime(config: { state: TSharedState }): RuntimeService<TSharedState> {
 		if (runtime) {
 			throw new Error("Runtime already initialized")
 		}
 
-		const inferenceRunner =
-			config.inferenceRunnerConfig?.runner ??
-			new DefaultInferenceRunner(
-				config.inferenceRunnerConfig?.supportedModels ?? supportedModels,
-				new InferenceInputValidator(),
-			)
-
-		const functionCallRunner = new DefaultFunctionCallRunner()
-
-		runtime = new RuntimeService(config.state, processor, inferenceRunner, functionCallRunner)
+		runtime = new RuntimeService(config.state)
 
 		return runtime
 	}
 
-	function resolveRuntime(): RuntimeService<TRuntimeState> {
+	function resolveRuntime(): RuntimeService<TSharedState> {
 		if (!runtime) {
 			throw new Error("Runtime not initialized")
 		}
@@ -53,34 +30,56 @@ export function defineRuntime<TRuntimeState extends RuntimeState>() {
 		return runtime
 	}
 
-	function resolveParticipant(id: string): Participant {
-		if (!runtime) {
-			throw new Error("Runtime not initialized")
-		}
+	const createParticipantUseCase = new CreateParticipantUseCase()
 
-		const participant = runtime.state.getParticipant(id)
-
-		if (!participant) {
-			throw new Error(`Participant ${id} not found`)
-		}
-
-		return participant
+	const createParticipant = async (name: string, capabilities: readonly string[], handlers: SituationHandler[]) => {
+		return await createParticipantUseCase.execute(name, capabilities, handlers)
 	}
 
-	const join = createJoin(resolveRuntime)
-	const leave = createLeave(resolveRuntime)
-	const sendMessage = createSendMessage(resolveRuntime)
-	const sendEvent = createSendEvent(resolveRuntime)
-	const runLoop = createRunLoop(resolveRuntime)
+	const spaceRepository = new InMemorySpaceRepository()
+	const eventPublisher = new EventPublisher()
+	const participantJoinedUseCase = new ParticipantJoinedUseCase(spaceRepository, eventPublisher)
+	const join = async (spaceId: string, participantId: string) => {
+		return await participantJoinedUseCase.execute(spaceId, participantId, new Date())
+	}
+
+	const participantLeftUseCase = new ParticipantLefUseCase(spaceRepository, eventPublisher)
+	const leave = async (spaceId: string, participantId: string) => {
+		return await participantLeftUseCase.execute(spaceId, participantId, new Date())
+	}
+
+	const sendMessageUseCase = new SendMessageUseCase(spaceRepository, eventPublisher)
+	const sendMessage = async (spaceId: string, participantId: string, message: string) => {
+		return await sendMessageUseCase.execute(spaceId, participantId, message)
+	}
+
+	const sendMessageTool: Tool = {
+		type: "function",
+		name: "send_message",
+		description: "Send a message to the space. The message will be sent to all participants in the space.",
+		parameters: {
+			spaceId: { type: "string" },
+			senderId: { type: "string" },
+			message: { type: "string" },
+		},
+		strict: true,
+		invoke: async (args: { spaceId: string; senderId: string; message: string }) => {
+			const sendMessageUseCase = new SendMessageUseCase(spaceRepository, eventPublisher)
+			await sendMessageUseCase.execute(args.spaceId, args.senderId, args.message)
+			return {
+				success: true,
+				message: "Message sent successfully",
+			}
+		},
+	}
 
 	return {
 		initializeRuntime,
 		resolveRuntime,
-		resolveParticipant,
+		createParticipant,
 		join,
 		leave,
 		sendMessage,
-		sendEvent,
-		runLoop,
+		sendMessageTool,
 	}
 }

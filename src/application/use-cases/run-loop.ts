@@ -1,61 +1,42 @@
-import { RuntimeService } from "@app/services/runtime"
-import { AgentLoop } from "@domain/agentic-environment/loop/agent-loop"
-import { LoopStateExecutor } from "@domain/agentic-environment/loop/state-executor"
-import { FunctionCallState } from "@app/states/function-call"
-import { InferenceInput, InferenceState } from "@app/states/inference"
-import { MessageReceivedState } from "@app/states/message-received"
-import { ModelMessageState } from "@app/states/model-message"
-import { TransitionResolver } from "@domain/agentic-environment/loop/transition-resolver"
-import {
-	FunctionCallToInferenceRule,
-	InferenceToFunctionCallRule,
-	InferenceToModelMessageRule,
-	ContextPreparationToInferenceRule,
-	ModelMessageToIdleRule,
-} from "@domain/agentic-environment/loop/transition-rule"
-import { RuntimeState } from "@domain/agentic-environment/runtime-state"
-import { EventPublisherLoopVisitor } from "@domain/agentic-environment/loop/event-publisher-visitor"
-import { InferenceStreamingState } from "@app/states/inference-streaming"
-import { InterceptionHandler } from "@domain/agentic-environment/loop/interception"
+import { AgentRepository } from "@domain/agent/agent-repository"
+import { Loop } from "@domain/agent/loop/loop"
+import { RuleEngine } from "@domain/agent/loop/rule-engine"
+import { LoopRepository } from "@domain/agent/loop/repository"
+import { DirectiveExecutionStrategyResolver } from "@application/directive-execution/directive-execution-strategy-resolver"
 
-export function createRunLoop<TRuntimeState extends RuntimeState>(resolveRuntime: () => RuntimeService<TRuntimeState>) {
-	return function runLoop(
-		agentId: string,
-		message: string,
-		inferenceInput: InferenceInput,
-		interceptionHandler?: InterceptionHandler,
+export class RunLoopUseCase {
+	private readonly ruleEngine: RuleEngine
+
+	constructor(
+		private readonly agentRepository: AgentRepository,
+		private readonly loopRepository: LoopRepository,
+		private readonly directiveExecutionStrategyResolver: DirectiveExecutionStrategyResolver,
 	) {
-		const runtime = resolveRuntime()
-		const inferenceRunner = runtime.getInferenceRunner()
-		const functionCallRunner = runtime.getFunctionCallRunner()
+		this.ruleEngine = new RuleEngine()
+	}
 
-		const transitionResolver = new TransitionResolver([
-			// High-priority interception rules would go first.
-			new ContextPreparationToInferenceRule(),
-			new InferenceToFunctionCallRule(),
-			new InferenceToModelMessageRule(),
-			new FunctionCallToInferenceRule(),
-			new ModelMessageToIdleRule(),
-		])
+	async execute(loopId: string): Promise<Loop> {
+		const loop = await this.loopRepository.findById(loopId)
+		if (!loop) {
+			throw new Error("Loop not found")
+		}
 
-		const stateExecutor = new LoopStateExecutor(
-			new MessageReceivedState(),
-			new InferenceState(inferenceRunner),
-			new InferenceStreamingState(inferenceRunner),
-			new FunctionCallState(functionCallRunner),
-			new ModelMessageState(),
-		)
+		const agent = await this.agentRepository.findById(loop.getAgentId())
+		if (!agent) {
+			throw new Error("Agent not found")
+		}
 
-		const agentLoop = AgentLoop.create(stateExecutor, transitionResolver, interceptionHandler)
+		while (loop.stateId !== "completed") {
+			const directive = this.ruleEngine.decide(agent, loop)
 
-		const loopVisitor = new EventPublisherLoopVisitor(agentId, agentLoop.getLoopId(), runtime)
+			if (!directive) return loop
 
-		agentLoop.run(
-			{
-				content: message,
-				input: inferenceInput,
-			},
-			loopVisitor,
-		)
+			const strategy = this.directiveExecutionStrategyResolver.resolve(directive)
+			await strategy.execute(directive, agent, loop)
+		}
+
+		await this.loopRepository.save(loop)
+
+		return loop
 	}
 }

@@ -1,4 +1,4 @@
-import type { ModelSpecification } from "@domain/generative-model/generative-model"
+import type { ModelSpecification } from "@domain/inference/generative-model"
 
 export const gpt54Specification: ModelSpecification = {
 	name: "gpt-5.4",
@@ -10,8 +10,8 @@ export const gpt54Specification: ModelSpecification = {
 		"system_message",
 		"developer_message",
 		"reasoning",
-		"function_call",
-		"function_call_output",
+		"tool_use_request",
+		"tool_use_result",
 		"model_message",
 	],
 	supportsStreaming: true,

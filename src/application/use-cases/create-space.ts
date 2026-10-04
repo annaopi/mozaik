@@ -9,8 +9,9 @@ export class CreateSpaceUseCase {
 		this.spaceRepository = spaceRepository
 	}
 
-	async execute(name: string, ownerId: string, participants: Participant[]): Promise<Space> {
-		const space = Space.create(name, ownerId, participants)
+	async execute(name: string): Promise<Space> {
+		const participants: Participant[] = []
+		const space = Space.create(name, participants)
 
 		await this.spaceRepository.save(space)
 		return space

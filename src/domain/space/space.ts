@@ -1,24 +1,22 @@
 import { MessageSentEvent, ParticipantJoinedEvent, ParticipantLeftEvent, SpaceEvent } from "@domain/space/event"
 import { Participant } from "@domain/space/participant"
+import { SystemClock } from "@util/system-clock"
 import { UuidGenerator } from "@util/uuid-generator"
 
 export type SpaceRecord = {
 	id: string
 	name: string
-	ownerId: string
 	participants: Participant[]
 }
 
 export class Space {
 	private readonly id: string
-	private readonly ownerId: string
 	private name: string
 	private participants: Participant[]
 	private events: SpaceEvent[]
 
-	constructor(id: string, name: string, ownerId: string, participants: Participant[], events: SpaceEvent[] = []) {
+	constructor(id: string, name: string, participants: Participant[], events: SpaceEvent[] = []) {
 		this.id = id
-		this.ownerId = ownerId
 		this.name = name
 		this.participants = participants
 		this.events = events
@@ -32,17 +30,14 @@ export class Space {
 		return this.name
 	}
 
-	getOwnerId(): string {
-		return this.ownerId
-	}
-
-	addParticipant(participant: Participant, occurredAt: Date): SpaceEvent | undefined {
+	addParticipant(participant: Participant): SpaceEvent | undefined {
 		const alreadyExists = this.participants.find((p) => p.getId() === participant.getId())
 
 		if (alreadyExists) return
 
 		this.participants.push(participant)
 
+		const occurredAt = SystemClock.now()
 		return ParticipantJoinedEvent.init(participant.getManifest(), occurredAt)
 	}
 
@@ -55,9 +50,10 @@ export class Space {
 		return participant
 	}
 
-	removeParticipant(participant: Participant, occurredAt: Date): SpaceEvent {
+	removeParticipant(participant: Participant): SpaceEvent {
 		this.participants = this.participants.filter((p) => p.getId() !== participant.getId())
 
+		const occurredAt = SystemClock.now()
 		return ParticipantLeftEvent.init(participant.getManifest(), occurredAt)
 	}
 
@@ -75,21 +71,20 @@ export class Space {
 		return [...this.events]
 	}
 
-	static create(name: string, ownerId: string, participants: Participant[] = []): Space {
+	static create(name: string, participants: Participant[] = []): Space {
 		const id = UuidGenerator.create()
-		return new Space(id, name, ownerId, participants)
+		return new Space(id, name, participants)
 	}
 
 	get record(): SpaceRecord {
 		return {
 			id: this.id,
 			name: this.name,
-			ownerId: this.ownerId,
 			participants: this.participants,
 		}
 	}
 
-	static rehydrate({ id, name, ownerId, participants }: SpaceRecord): Space {
-		return new Space(id, name, ownerId, participants)
+	static rehydrate({ id, name, participants }: SpaceRecord): Space {
+		return new Space(id, name, participants)
 	}
 }

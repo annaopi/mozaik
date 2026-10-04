@@ -12,10 +12,6 @@ export class InMemorySpaceRepository implements SpaceRepository {
 		return this.spaces.find((space) => space.getId() === id)
 	}
 
-	async findAllByOwnerId(ownerId: string): Promise<Space[]> {
-		return this.spaces.filter((space) => space.getOwnerId() === ownerId)
-	}
-
 	async delete(id: string): Promise<void> {
 		this.spaces = this.spaces.filter((space) => space.getId() !== id)
 	}

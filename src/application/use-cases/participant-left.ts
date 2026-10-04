@@ -10,7 +10,7 @@ export class ParticipantLefUseCase {
 		this.eventPublisher = eventPublisher
 	}
 
-	async execute(spaceId: string, participantId: string, occurredAt: Date): Promise<void> {
+	async execute(spaceId: string, participantId: string): Promise<void> {
 		const space = await this.spaceRepository.findById(spaceId)
 		if (!space) {
 			throw new Error("Space not found")
@@ -19,7 +19,7 @@ export class ParticipantLefUseCase {
 		if (!participant) {
 			throw new Error("Participant not found")
 		}
-		const event = space.removeParticipant(participant, occurredAt)
+		const event = space.removeParticipant(participant)
 		if (event) {
 			this.eventPublisher.publish(event, space.getParticipants())
 		}

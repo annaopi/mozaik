@@ -8,6 +8,7 @@ import { EventPublisher } from "@domain/space/event-publisher"
 import { ParticipantLefUseCase } from "@application/use-cases/participant-left"
 import { SendMessageUseCase } from "@application/use-cases/send-message"
 import { Tool } from "@domain/inference/tool"
+import { CreateSpaceUseCase } from "@application/use-cases/create-space"
 
 export function defineRuntime<TSharedState extends SharedState>() {
 	let runtime: RuntimeService<TSharedState> | null = null
@@ -38,14 +39,20 @@ export function defineRuntime<TSharedState extends SharedState>() {
 
 	const spaceRepository = new InMemorySpaceRepository()
 	const eventPublisher = new EventPublisher()
+
+	const createSpaceUseCase = new CreateSpaceUseCase(spaceRepository)
+	const createSpace = async (name: string) => {
+		return await createSpaceUseCase.execute(name)
+	}
+
 	const participantJoinedUseCase = new ParticipantJoinedUseCase(spaceRepository, eventPublisher)
 	const join = async (spaceId: string, participantId: string) => {
-		return await participantJoinedUseCase.execute(spaceId, participantId, new Date())
+		return await participantJoinedUseCase.execute(spaceId, participantId)
 	}
 
 	const participantLeftUseCase = new ParticipantLefUseCase(spaceRepository, eventPublisher)
 	const leave = async (spaceId: string, participantId: string) => {
-		return await participantLeftUseCase.execute(spaceId, participantId, new Date())
+		return await participantLeftUseCase.execute(spaceId, participantId)
 	}
 
 	const sendMessageUseCase = new SendMessageUseCase(spaceRepository, eventPublisher)
@@ -77,6 +84,7 @@ export function defineRuntime<TSharedState extends SharedState>() {
 		initializeRuntime,
 		resolveRuntime,
 		createParticipant,
+		createSpace,
 		join,
 		leave,
 		sendMessage,

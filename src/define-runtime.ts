@@ -1,13 +1,13 @@
 import { RuntimeService } from "@domain/space/runtime"
 import { SituationHandler } from "@domain/space/situation-handler"
 import { CreateParticipantUseCase } from "@application/use-cases/create-participant"
-import { SharedState } from "./shared-state"
-import { UuidGenerator } from "@util/uuid-generator"
+import { SharedState } from "@domain/space/shared-state"
 import { ParticipantJoinedUseCase } from "@application/use-cases/participant-joined"
 import { InMemorySpaceRepository } from "@infrastructure/repositories/in-memory-space-repository"
-import { EventPublisher } from "./event-publisher"
+import { EventPublisher } from "@domain/space/event-publisher"
 import { ParticipantLefUseCase } from "@application/use-cases/participant-left"
 import { SendMessageUseCase } from "@application/use-cases/send-message"
+import { Tool } from "@domain/inference/tool"
 
 export function defineRuntime<TSharedState extends SharedState>() {
 	let runtime: RuntimeService<TSharedState> | null = null
@@ -53,6 +53,26 @@ export function defineRuntime<TSharedState extends SharedState>() {
 		return await sendMessageUseCase.execute(spaceId, participantId, message)
 	}
 
+	const sendMessageTool: Tool = {
+		type: "function",
+		name: "send_message",
+		description: "Send a message to the space. The message will be sent to all participants in the space.",
+		parameters: {
+			spaceId: { type: "string" },
+			senderId: { type: "string" },
+			message: { type: "string" },
+		},
+		strict: true,
+		invoke: async (args: { spaceId: string; senderId: string; message: string }) => {
+			const sendMessageUseCase = new SendMessageUseCase(spaceRepository, eventPublisher)
+			await sendMessageUseCase.execute(args.spaceId, args.senderId, args.message)
+			return {
+				success: true,
+				message: "Message sent successfully",
+			}
+		},
+	}
+
 	return {
 		initializeRuntime,
 		resolveRuntime,
@@ -60,5 +80,6 @@ export function defineRuntime<TSharedState extends SharedState>() {
 		join,
 		leave,
 		sendMessage,
+		sendMessageTool,
 	}
 }

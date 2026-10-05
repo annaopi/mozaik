@@ -1,8 +1,21 @@
 import { AgentLoop } from "@domain/agent/loop/specification"
 import { LoopControlDirective } from "@domain/agent/loop/directive"
+import { InferenceRequest } from "@domain/inference/inference-runner"
 
 export abstract class LoopAction {
 	abstract execute(agentLoop: AgentLoop): LoopControlDirective
+}
+
+export class RequestPreparationAction extends LoopAction {
+	constructor(private readonly request: InferenceRequest) {
+		super()
+	}
+	execute(agentLoop: AgentLoop): LoopControlDirective {
+		return {
+			type: "inference",
+			request: this.request,
+		}
+	}
 }
 
 export class InferenceAction extends LoopAction {

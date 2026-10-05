@@ -6,7 +6,7 @@ import { Agent } from "@domain/agent/agent"
 export class RuleEngine {
 	decide(agent: Agent, loop: Loop): LoopControlDirective | undefined {
 		const agentLoop: AgentLoop = { agent, loop }
-		const satisfiedRules = loop.rules.filter((rule) => rule.condition.isSatisfiedBy(agentLoop))
+		const satisfiedRules = loop.ruleBook.getRules().filter((rule) => rule.condition.isSatisfiedBy(agentLoop))
 		if (satisfiedRules.length === 0) {
 			return undefined
 		}

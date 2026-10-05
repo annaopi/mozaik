@@ -1,5 +1,18 @@
-import { LoopSpecification } from "@domain/agent/loop/specification"
-import { LoopAction } from "@domain/agent/loop/action"
+import {
+	AwaitingInference,
+	AwaitingRequest,
+	AwaitingToolOutput,
+	LoopSpecification,
+	ModelAnswered,
+} from "@domain/agent/loop/specification"
+import {
+	CompleteAction,
+	InferenceAction,
+	LoopAction,
+	RequestPreparationAction,
+	ToolUseAction,
+} from "@domain/agent/loop/action"
+import { InferenceRequest } from "@domain/inference/inference-runner"
 
 export type CreateLoopRuleParams = {
 	readonly priority?: number
@@ -55,3 +68,67 @@ export class LoopRule {
 		return rule
 	}
 }
+
+export type RuleBookRecord = {
+	readonly rules: LoopRuleRecord[]
+}
+
+export class RuleBook {
+	private rules: LoopRule[]
+
+	private constructor(rules: LoopRule[]) {
+		this.rules = rules
+	}
+
+	addRule(rule: LoopRule): void {
+		this.rules.push(rule)
+	}
+
+	removeRule(rule: LoopRule): void {
+		this.rules = this.rules.filter((r) => r.id !== rule.id)
+	}
+
+	getRules(): readonly LoopRule[] {
+		return this.rules
+	}
+
+	static create(loopRuleParams: CreateLoopRuleParams[]): RuleBook {
+		const rules = loopRuleParams.map((param) => LoopRule.create(param))
+		return new RuleBook(rules)
+	}
+
+	static rehydrate(record: RuleBookRecord): RuleBook {
+		const rules = record.rules.map((rule) => LoopRule.rehydrate(rule))
+		return new RuleBook(rules)
+	}
+
+	record(): RuleBookRecord {
+		return {
+			rules: this.rules.map((rule) => ({
+				id: rule.id,
+				priority: rule.priority,
+				condition: rule.condition,
+				action: rule.action,
+			})),
+		}
+	}
+}
+
+export const defaultRules: (request: InferenceRequest) => CreateLoopRuleParams[] = (request: InferenceRequest) => [
+	{
+		when: new AwaitingRequest(),
+		then: new RequestPreparationAction(request),
+	},
+	{
+		when: new AwaitingInference(),
+		then: new InferenceAction(),
+	},
+	{
+		when: new AwaitingToolOutput(),
+		then: new ToolUseAction(),
+	},
+	{
+		when: new ModelAnswered(),
+		then: new CompleteAction("completed"),
+	},
+]

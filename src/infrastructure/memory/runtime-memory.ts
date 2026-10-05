@@ -7,16 +7,10 @@ export class RuntimeMemory implements Memory {
 	constructor(context: Context) {
 		this.context = context
 	}
-
-	getContext(): Context {
-		return this.context
+	remember(items: ContextItem[], participantId: string): void {
+		throw new Error("Method not implemented.")
 	}
-
-	saveItem(item: ContextItem): void {
-		this.context.items.push(item)
-	}
-
-	saveItems(items: ContextItem[]): void {
-		this.context.items.push(...items)
+	recall(topic: string, participantId: string): ContextItem[] {
+		throw new Error("Method not implemented.")
 	}
 }

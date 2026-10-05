@@ -8,7 +8,7 @@ import {
 } from "@domain/agent/loop/operation"
 import { LoopTransition } from "@domain/agent/loop/transition"
 import { LoopRecord } from "@domain/agent/loop/record"
-import { LoopRule } from "./rule"
+import { CreateLoopRuleParams, RuleBook } from "./rule"
 import { SystemClock } from "@util/system-clock"
 import { UuidGenerator } from "@util/uuid-generator"
 
@@ -20,6 +20,18 @@ export type LoopStateId =
 	| "stopped"
 	| "completed"
 
+export type CreateLoopParams =
+	| {
+			subject: string
+			agentId: string
+			rules: CreateLoopRuleParams[]
+	  }
+	| {
+			subject: string
+			agentId: string
+			request: InferenceRequest
+	  }
+
 export class Loop {
 	private readonly loopId: string
 	private readonly agentId: string
@@ -30,7 +42,7 @@ export class Loop {
 	private readonly transitionHistory: LoopTransition[]
 	private inferenceRequest: InferenceRequest | undefined
 	private readonly operationHistory: CompletedOperation[]
-	private readonly loopRules: LoopRule[]
+	private readonly _ruleBook: RuleBook
 
 	private constructor(
 		loopId: string,
@@ -42,7 +54,7 @@ export class Loop {
 		pendingOperation: PendingOperation | undefined,
 		transitionHistory: LoopTransition[],
 		operationHistory: CompletedOperation[],
-		rules: LoopRule[],
+		ruleBook: RuleBook,
 	) {
 		this.loopId = loopId
 		this.agentId = agentId
@@ -53,7 +65,7 @@ export class Loop {
 		this.pendingOperation = pendingOperation
 		this.transitionHistory = transitionHistory
 		this.operationHistory = operationHistory
-		this.loopRules = rules
+		this._ruleBook = ruleBook
 	}
 
 	get id(): string {
@@ -80,8 +92,12 @@ export class Loop {
 		return this.inferenceRequest
 	}
 
-	get rules(): readonly LoopRule[] {
-		return this.loopRules
+	get ruleBook(): RuleBook {
+		return this._ruleBook
+	}
+
+	getSubject(): string {
+		return this.subject
 	}
 
 	getAgentId(): string {
@@ -99,7 +115,7 @@ export class Loop {
 			pendingOperation: this.pendingOperation,
 			transitionHistory: [...this.transitionHistory],
 			operationHistory: [...this.operationHistory],
-			rules: [...this.rules],
+			ruleBook: this.ruleBook.record(),
 		}
 	}
 
@@ -277,8 +293,9 @@ export class Loop {
 		}
 	}
 
-	static create(id: string, agentId: string, subject: string, rules: LoopRule[]): Loop {
+	static create(agentId: string, subject: string, ruleBook: RuleBook): Loop {
 		const createdAt = SystemClock.now()
+		const id = UuidGenerator.create()
 		return new Loop(
 			id,
 			agentId,
@@ -289,7 +306,7 @@ export class Loop {
 			undefined,
 			[],
 			[],
-			rules,
+			ruleBook,
 		)
 	}
 
@@ -304,7 +321,7 @@ export class Loop {
 			record.pendingOperation,
 			[...record.transitionHistory],
 			[...record.operationHistory],
-			[...record.rules],
+			RuleBook.rehydrate(record.ruleBook),
 		)
 	}
 }

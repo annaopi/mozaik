@@ -26,11 +26,6 @@ export class CreateAgentUseCase {
 		const id = UuidGenerator.create()
 		const manifest: ParticipantManifest = { id, name, role: "agent" }
 		const memory = this.memoryFactory.create()
-		const developerMessageItem: DeveloperMessageItem = {
-			type: "developer_message",
-			text: instruction,
-		}
-		memory.saveItem(developerMessageItem)
 
 		const agentRecord: AgentRecord = { id, manifest, tools, memory, handlers }
 		const agent = Agent.create(agentRecord)

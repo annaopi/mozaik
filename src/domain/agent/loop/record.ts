@@ -2,7 +2,7 @@ import { CompletedOperation, PendingOperation } from "@domain/agent/loop/operati
 import { LoopTransition } from "@domain/agent/loop/transition"
 import { InferenceRequest } from "@domain/inference/inference-runner"
 import { LoopStateId } from "@domain/agent/loop/loop"
-import { LoopRule } from "@domain/agent/loop/rule"
+import { RuleBookRecord } from "@domain/agent/loop/rule"
 
 export interface LoopRecord {
 	id: string
@@ -14,5 +14,5 @@ export interface LoopRecord {
 	pendingOperation?: PendingOperation
 	transitionHistory: LoopTransition[]
 	operationHistory: CompletedOperation[]
-	rules: LoopRule[]
+	ruleBook: RuleBookRecord
 }

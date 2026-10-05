@@ -1,14 +1,21 @@
-import { Loop } from "@domain/agent/loop/loop"
+import { CreateLoopParams, Loop } from "@domain/agent/loop/loop"
 import { LoopRepository } from "@domain/agent/loop/repository"
-import { LoopRule } from "@domain/agent/loop/rule"
-import { UuidGenerator } from "@util/uuid-generator"
+import { defaultRules, RuleBook } from "@domain/agent/loop/rule"
 
 export class CreateAgentLoopUseCase {
 	constructor(private readonly loopRepository: LoopRepository) {}
 
-	async execute(subject: string, agentId: string, rules: LoopRule[]): Promise<Loop> {
-		const loop = Loop.create(UuidGenerator.create(), agentId, subject, rules)
-		await this.loopRepository.save(loop)
-		return loop
+	async execute(params: CreateLoopParams): Promise<Loop> {
+		if ("rules" in params) {
+			const ruleBook = RuleBook.create(params.rules)
+			const loop = Loop.create(params.agentId, params.subject, ruleBook)
+			await this.loopRepository.save(loop)
+			return loop
+		} else {
+			const ruleBook = RuleBook.create(defaultRules(params.request))
+			const loop = Loop.create(params.agentId, params.subject, ruleBook)
+			await this.loopRepository.save(loop)
+			return loop
+		}
 	}
 }

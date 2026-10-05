@@ -11,6 +11,7 @@ import { InferenceRunner } from "@domain/inference/inference-runner"
 import { AgentRepository } from "@domain/agent/agent-repository"
 import { LoopRepository } from "@domain/agent/loop/repository"
 import { ToolUseRunner } from "@domain/inference/tool-use-runner"
+import { Agent } from "@domain/agent/agent"
 
 export {
 	defineRuntime,
@@ -29,5 +30,6 @@ export {
 	SituationProcessor,
 	SituationSpecification,
 	SituationContext,
+	Agent,
 	Tool,
 }

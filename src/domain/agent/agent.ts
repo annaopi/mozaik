@@ -1,42 +1,59 @@
 import { Memory } from "@domain/agent/memory"
-import { Participant, ParticipantManifest } from "@domain/space/participant"
 import { Tool } from "@domain/inference/tool"
-import { SituationHandler } from "@domain/space/situation-handler"
 import { AgentRecord } from "@domain/agent/record"
+import { UuidGenerator } from "@util/uuid-generator"
 
-export class Agent extends Participant {
-	private memory: Memory
-	private tools: Tool[]
+export class Agent {
+	private _id: string
+	private _name: string
+	private _instruction: string
+	private _memory: Memory
+	private _tools: Tool[]
 
-	constructor(manifest: ParticipantManifest, tools: Tool[], memory: Memory, handlers: SituationHandler[]) {
-		super(manifest, handlers)
-		this.memory = memory
-		this.tools = tools
+	constructor(id: string, name: string, instruction: string, tools: Tool[], memory: Memory) {
+		this._id = id
+		this._name = name
+		this._instruction = instruction
+		this._memory = memory
+		this._tools = tools
 	}
 
-	getTools(): Tool[] {
-		return this.tools
+	get id(): string {
+		return this._id
 	}
 
-	getMemory(): Memory {
-		return this.memory
+	get name(): string {
+		return this._name
+	}
+
+	get instruction(): string {
+		return this._instruction
+	}
+
+	get tools(): Tool[] {
+		return this._tools
+	}
+
+	get memory(): Memory {
+		return this._memory
 	}
 
 	static create({
-		manifest,
+		name,
+		instruction,
 		tools,
 		memory,
-		handlers,
 	}: {
-		manifest: ParticipantManifest
+		name: string
+		instruction: string
 		tools: Tool[]
 		memory: Memory
-		handlers: SituationHandler[]
 	}): Agent {
-		return new Agent(manifest, tools, memory, handlers)
+		const id = UuidGenerator.create()
+		return new Agent(id, name, instruction, tools, memory)
 	}
 
 	static rehydrate(record: AgentRecord): Agent {
-		return new Agent(record.manifest, record.tools, record.memory, record.handlers)
+		return new Agent(record.id, record.name, record.instruction, record.tools, record.memory)
 	}
 }

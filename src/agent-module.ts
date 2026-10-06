@@ -4,7 +4,7 @@ import { Tool } from "@domain/inference/tool"
 import { SituationHandler } from "@domain/space/situation-handler"
 import { CreateAgentLoopUseCase } from "@application/use-cases/create-loop"
 import { InMemoryLoopRepository } from "@infrastructure/repositories/in-memory-loop-repository"
-import { InferenceRequest, InferenceRunner } from "@domain/inference/inference-runner"
+import { InferenceRunner } from "@domain/inference/inference-runner"
 import { AgentRepository } from "@domain/agent/agent-repository"
 import { LoopRepository } from "@domain/agent/loop/repository"
 import { ToolUseRunner } from "@domain/inference/tool-use-runner"
@@ -13,18 +13,15 @@ import { DefaultInferenceRunner } from "@application/runners/inference-runner"
 import { GenerativeModel } from "@domain/inference/generative-model"
 import { InferenceRequestValidator } from "@domain/inference/request-validation/inference-request-validator"
 import { supportedModels } from "@infrastructure/providers/supported-models"
-import { AgentRecord } from "./domain/agent/record"
-import { CreateLoopParams, Loop, LoopStateId } from "./domain/agent/loop/loop"
+import { CreateLoopParams, Loop } from "./domain/agent/loop/loop"
 import { RunLoopUseCase } from "@application/use-cases/run-loop"
-import { LoopSpecification, ModelAnswered } from "./domain/agent/loop/specification"
-import { CompleteAction, InferenceAction, LoopAction, ToolUseAction, WaitAction } from "./domain/agent/loop/action"
-import { CreateLoopRuleParams, LoopRule, RuleBook } from "./domain/agent/loop/rule"
 import { RuntimeMemoryFactory } from "@infrastructure/memory/runtime-memory-factory"
 import { DirectiveExecutionStrategyResolver } from "@application/directive-execution/directive-execution-strategy-resolver"
 import { CompleteExecutionStrategy } from "@application/directive-execution/complete-execution-strategy"
 import { InferenceExecutionStrategy } from "@application/directive-execution/inference-execution-strategy"
 import { ToolUseExecutionStrategy } from "@application/directive-execution/tool-use-execution-strategy"
 import { WaitExecutionStrategy } from "@application/directive-execution/wait-execution-strategy"
+import { Agent } from "@domain/agent/agent"
 
 export type InferenceRunnerConfig = {
 	supportedModels?: GenerativeModel[]
@@ -64,8 +61,8 @@ export function defineAgentModule(config: AgentModuleConfig) {
 		handlers: SituationHandler[]
 	}
 	// Interfaces
-	async function createAgent(config: CreateAgentParams): Promise<AgentRecord> {
-		return await createAgentUseCase.execute(config.name, config.instruction, config.tools, config.handlers)
+	async function createAgent(config: CreateAgentParams): Promise<Agent> {
+		return await createAgentUseCase.execute(config.name, config.instruction, config.tools)
 	}
 
 	async function createLoop(params: CreateLoopParams): Promise<Loop> {

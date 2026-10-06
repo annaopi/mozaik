@@ -1,7 +1,7 @@
 import { SpaceRepository } from "@domain/space/space-repository"
 import { EventPublisher } from "@domain/space/event-publisher"
 
-export class ParticipantJoinedUseCase {
+export class ParticipantLeaveUseCase {
 	private readonly spaceRepository: SpaceRepository
 	private readonly eventPublisher: EventPublisher
 
@@ -19,7 +19,7 @@ export class ParticipantJoinedUseCase {
 		if (!participant) {
 			throw new Error("Participant not found")
 		}
-		const event = space.addParticipant(participant)
+		const event = space.removeParticipant(participant)
 		if (event) {
 			this.eventPublisher.publish(event, space.getParticipants())
 		}

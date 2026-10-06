@@ -2,13 +2,14 @@ import { RuntimeService } from "@domain/space/runtime"
 import { SituationHandler } from "@domain/space/situation-handler"
 import { CreateParticipantUseCase } from "@application/use-cases/create-participant"
 import { SharedState } from "@domain/space/shared-state"
-import { ParticipantJoinedUseCase } from "@application/use-cases/participant-joined"
+import { ParticipantJoinUseCase } from "@application/use-cases/participant-join"
 import { InMemorySpaceRepository } from "@infrastructure/repositories/in-memory-space-repository"
 import { EventPublisher } from "@domain/space/event-publisher"
-import { ParticipantLefUseCase } from "@application/use-cases/participant-left"
+import { ParticipantLeaveUseCase } from "@application/use-cases/participant-leave"
 import { SendMessageUseCase } from "@application/use-cases/send-message"
 import { Tool } from "@domain/inference/tool"
 import { CreateSpaceUseCase } from "@application/use-cases/create-space"
+import { Participant } from "@domain/space/participant"
 
 export function defineRuntime<TSharedState extends SharedState>() {
 	let runtime: RuntimeService<TSharedState> | null = null
@@ -45,12 +46,12 @@ export function defineRuntime<TSharedState extends SharedState>() {
 		return await createSpaceUseCase.execute(name)
 	}
 
-	const participantJoinedUseCase = new ParticipantJoinedUseCase(spaceRepository, eventPublisher)
-	const join = async (spaceId: string, participantId: string) => {
-		return await participantJoinedUseCase.execute(spaceId, participantId)
+	const participantJoinedUseCase = new ParticipantJoinUseCase(spaceRepository, eventPublisher)
+	const join = async (spaceId: string, participant: Participant) => {
+		return await participantJoinedUseCase.execute(spaceId, participant)
 	}
 
-	const participantLeftUseCase = new ParticipantLefUseCase(spaceRepository, eventPublisher)
+	const participantLeftUseCase = new ParticipantLeaveUseCase(spaceRepository, eventPublisher)
 	const leave = async (spaceId: string, participantId: string) => {
 		return await participantLeftUseCase.execute(spaceId, participantId)
 	}

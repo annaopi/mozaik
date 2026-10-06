@@ -11,7 +11,7 @@ export class ParticipantJoinUseCase {
 		this.eventPublisher = eventPublisher
 	}
 
-	async execute(spaceId: string, participant: Participant): Promise<void> {
+	async execute(spaceId: string, participant: Participant<unknown>): Promise<void> {
 		const space = await this.spaceRepository.findById(spaceId)
 		if (!space) {
 			throw new Error("Space not found")

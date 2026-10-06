@@ -6,16 +6,16 @@ import { UuidGenerator } from "@util/uuid-generator"
 export type SpaceRecord = {
 	id: string
 	name: string
-	participants: Participant[]
+	participants: Participant<unknown>[]
 }
 
 export class Space {
 	private readonly id: string
 	private name: string
-	private participants: Participant[]
+	private participants: Participant<unknown>[]
 	private events: SpaceEvent[]
 
-	constructor(id: string, name: string, participants: Participant[], events: SpaceEvent[] = []) {
+	constructor(id: string, name: string, participants: Participant<any>[], events: SpaceEvent[] = []) {
 		this.id = id
 		this.name = name
 		this.participants = participants
@@ -30,7 +30,7 @@ export class Space {
 		return this.name
 	}
 
-	addParticipant(participant: Participant): SpaceEvent | undefined {
+	addParticipant(participant: Participant<unknown>): SpaceEvent | undefined {
 		const alreadyExists = this.participants.find((p) => p.getId() === participant.getId())
 
 		if (alreadyExists) return
@@ -41,23 +41,23 @@ export class Space {
 		return ParticipantJoinedEvent.init(participant.getManifest(), occurredAt)
 	}
 
-	getParticipant(id: string): Participant | undefined {
+	getParticipant(id: string): Participant<unknown> | undefined {
 		const participant = this.getParticipants().find((p) => p.getId() === id)
 		return participant
 	}
 
-	removeParticipant(participant: Participant): SpaceEvent {
+	removeParticipant(participant: Participant<unknown>): SpaceEvent {
 		this.participants = this.participants.filter((p) => p.getId() !== participant.getId())
 
 		const occurredAt = SystemClock.now()
 		return ParticipantLeftEvent.init(participant.getManifest(), occurredAt)
 	}
 
-	getParticipants(): Participant[] {
+	getParticipants(): Participant<unknown>[] {
 		return [...this.participants]
 	}
 
-	sendMessage(participant: Participant, message: string, occurredAt: Date): SpaceEvent {
+	sendMessage(participant: Participant<unknown>, message: string, occurredAt: Date): SpaceEvent {
 		const event = MessageSentEvent.init(participant.getId(), message, occurredAt)
 		this.events.push(event)
 		return event
@@ -67,7 +67,7 @@ export class Space {
 		return [...this.events]
 	}
 
-	static create(name: string, participants: Participant[] = []): Space {
+	static create(name: string, participants: Participant<unknown>[] = []): Space {
 		const id = UuidGenerator.create()
 		return new Space(id, name, participants)
 	}

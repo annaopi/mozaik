@@ -1,59 +1,68 @@
 import { SpaceEvent } from "@domain/space/event"
 import { Participant } from "@domain/space/participant"
 
-export type SituationContext<TEvent extends SpaceEvent = SpaceEvent> = {
+export type SituationContext<TParticipant, TEvent extends SpaceEvent = SpaceEvent> = {
 	readonly event: TEvent
-	readonly participant: Participant
+	readonly participant: Participant<TParticipant>
 }
 
-export abstract class SituationSpecification<TEvent extends SpaceEvent = SpaceEvent> {
-	abstract isSatisfiedBy(situationContext: SituationContext<TEvent>): boolean
+export abstract class SituationSpecification<TParticipant, TEvent extends SpaceEvent = SpaceEvent> {
+	abstract isSatisfiedBy(situationContext: SituationContext<TParticipant, TEvent>): boolean
 
-	and(other: SituationSpecification<TEvent>): SituationSpecification<TEvent> {
-		return new AndSituationSpecification(this, other)
+	and(other: SituationSpecification<TParticipant, TEvent>): SituationSpecification<TParticipant, TEvent> {
+		return new AndSituationSpecification<TParticipant, TEvent>(this, other)
 	}
 
-	or(other: SituationSpecification<TEvent>): SituationSpecification<TEvent> {
-		return new OrSituationSpecification(this, other)
+	or(other: SituationSpecification<TParticipant, TEvent>): SituationSpecification<TParticipant, TEvent> {
+		return new OrSituationSpecification<TParticipant, TEvent>(this, other)
 	}
 
-	not(): SituationSpecification<TEvent> {
-		return new NotSituationSpecification(this)
+	not(): SituationSpecification<TParticipant, TEvent> {
+		return new NotSituationSpecification<TParticipant, TEvent>(this)
 	}
 }
 
-class AndSituationSpecification<TEvent extends SpaceEvent> extends SituationSpecification<TEvent> {
+class AndSituationSpecification<TParticipant, TEvent extends SpaceEvent> extends SituationSpecification<
+	TParticipant,
+	TEvent
+> {
 	constructor(
-		private readonly left: SituationSpecification<TEvent>,
-		private readonly right: SituationSpecification<TEvent>,
+		private readonly left: SituationSpecification<TParticipant, TEvent>,
+		private readonly right: SituationSpecification<TParticipant, TEvent>,
 	) {
 		super()
 	}
 
-	isSatisfiedBy(situationContext: SituationContext<TEvent>): boolean {
+	isSatisfiedBy(situationContext: SituationContext<TParticipant, TEvent>): boolean {
 		return this.left.isSatisfiedBy(situationContext) && this.right.isSatisfiedBy(situationContext)
 	}
 }
 
-class OrSituationSpecification<TEvent extends SpaceEvent> extends SituationSpecification<TEvent> {
+class OrSituationSpecification<TParticipant, TEvent extends SpaceEvent> extends SituationSpecification<
+	TParticipant,
+	TEvent
+> {
 	constructor(
-		private readonly left: SituationSpecification<TEvent>,
-		private readonly right: SituationSpecification<TEvent>,
+		private readonly left: SituationSpecification<TParticipant, TEvent>,
+		private readonly right: SituationSpecification<TParticipant, TEvent>,
 	) {
 		super()
 	}
 
-	isSatisfiedBy(situationContext: SituationContext<TEvent>): boolean {
+	isSatisfiedBy(situationContext: SituationContext<TParticipant, TEvent>): boolean {
 		return this.left.isSatisfiedBy(situationContext) || this.right.isSatisfiedBy(situationContext)
 	}
 }
 
-class NotSituationSpecification<TEvent extends SpaceEvent> extends SituationSpecification<TEvent> {
-	constructor(private readonly rule: SituationSpecification<TEvent>) {
+class NotSituationSpecification<TParticipant, TEvent extends SpaceEvent> extends SituationSpecification<
+	TParticipant,
+	TEvent
+> {
+	constructor(private readonly rule: SituationSpecification<TParticipant, TEvent>) {
 		super()
 	}
 
-	isSatisfiedBy(situationContext: SituationContext<TEvent>): boolean {
+	isSatisfiedBy(situationContext: SituationContext<TParticipant, TEvent>): boolean {
 		return !this.rule.isSatisfiedBy(situationContext)
 	}
 }

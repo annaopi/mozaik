@@ -1,7 +1,6 @@
 import { CreateAgentUseCase } from "@application/use-cases/create-agent"
 import { InMemoryAgentRepository } from "@infrastructure/repositories/in-memory-agent-repository"
 import { Tool } from "@domain/inference/tool"
-import { SituationHandler } from "@domain/space/situation-handler"
 import { CreateAgentLoopUseCase } from "@application/use-cases/create-loop"
 import { InMemoryLoopRepository } from "@infrastructure/repositories/in-memory-loop-repository"
 import { InferenceRunner } from "@domain/inference/inference-runner"

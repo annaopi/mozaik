@@ -2,7 +2,7 @@ import { SpaceEvent } from "./event"
 import { Participant } from "./participant"
 
 export class EventPublisher {
-	publish(event: SpaceEvent, participants: Participant[]): void {
+	publish(event: SpaceEvent, participants: Participant<any>[]): void {
 		for (const participant of participants) {
 			participant.getHandlers().forEach((handler) => {
 				if (handler.specification.isSatisfiedBy({ event, participant })) {

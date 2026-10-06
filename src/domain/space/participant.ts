@@ -9,13 +9,18 @@ export type ParticipantManifest = {
 	readonly capabilities?: readonly string[]
 }
 
-export class Participant {
+export class Participant<TParticipant> {
 	private manifest: ParticipantManifest
-	private handlers: SituationHandler[]
+	private handlers: SituationHandler<TParticipant>[]
+	private _self: TParticipant
 
-	constructor(manifest: ParticipantManifest, handlers: SituationHandler[]) {
+	constructor(manifest: ParticipantManifest, handlers: SituationHandler<TParticipant>[], self: TParticipant) {
 		this.manifest = manifest
 		this.handlers = handlers
+		this._self = self
+	}
+	get self(): TParticipant {
+		return this._self
 	}
 
 	getManifest(): ParticipantManifest {
@@ -30,11 +35,11 @@ export class Participant {
 		return this.manifest.id
 	}
 
-	getHandlers(): SituationHandler[] {
+	getHandlers(): SituationHandler<TParticipant>[] {
 		return this.handlers
 	}
 
-	setHandlers(handlers: SituationHandler[]): void {
+	setHandlers(handlers: SituationHandler<TParticipant>[]): void {
 		this.handlers = handlers
 	}
 }

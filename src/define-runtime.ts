@@ -34,8 +34,13 @@ export function defineRuntime<TSharedState extends SharedState>() {
 
 	const createParticipantUseCase = new CreateParticipantUseCase()
 
-	const createParticipant = async (name: string, capabilities: readonly string[], handlers: SituationHandler[]) => {
-		return await createParticipantUseCase.execute(name, capabilities, handlers)
+	const createParticipant = async <TParticipant>(
+		name: string,
+		capabilities: readonly string[],
+		handlers: SituationHandler<TParticipant>[],
+		self: TParticipant,
+	) => {
+		return await createParticipantUseCase.execute(name, capabilities, handlers, self)
 	}
 
 	const spaceRepository = new InMemorySpaceRepository()
@@ -47,7 +52,7 @@ export function defineRuntime<TSharedState extends SharedState>() {
 	}
 
 	const participantJoinUseCase = new ParticipantJoinUseCase(spaceRepository, eventPublisher)
-	const join = async (spaceId: string, participant: Participant) => {
+	const join = async (spaceId: string, participant: Participant<unknown>) => {
 		return await participantJoinUseCase.execute(spaceId, participant)
 	}
 

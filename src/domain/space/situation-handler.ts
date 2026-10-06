@@ -2,16 +2,16 @@ import { SpaceEvent } from "@domain/space/event"
 import { Participant } from "@domain/space/participant"
 import { SituationSpecification } from "@domain/space/situation-specification"
 
-export interface SituationHandler {
-	readonly specification: SituationSpecification
-	readonly processor: SituationProcessor
+export interface SituationHandler<TParticipant> {
+	readonly specification: SituationSpecification<TParticipant>
+	readonly processor: SituationProcessor<TParticipant>
 }
 
-export type SituationContext<TEvent extends SpaceEvent = SpaceEvent> = {
+export type SituationContext<TParticipant, TEvent extends SpaceEvent = SpaceEvent> = {
 	readonly event: TEvent
-	readonly participant: Participant
+	readonly participant: Participant<TParticipant>
 }
 
-export interface SituationProcessor {
-	apply(context: SituationContext): void | Promise<void>
+export interface SituationProcessor<TParticipant> {
+	apply(context: SituationContext<TParticipant>): void | Promise<void>
 }

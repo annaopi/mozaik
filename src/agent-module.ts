@@ -58,7 +58,6 @@ export function defineAgentModule(config: AgentModuleConfig) {
 		name: string
 		instruction: string
 		tools: Tool[]
-		handlers: SituationHandler[]
 	}
 	// Interfaces
 	async function createAgent(config: CreateAgentParams): Promise<Agent> {

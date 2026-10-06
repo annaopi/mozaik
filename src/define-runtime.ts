@@ -46,14 +46,14 @@ export function defineRuntime<TSharedState extends SharedState>() {
 		return await createSpaceUseCase.execute(name)
 	}
 
-	const participantJoinedUseCase = new ParticipantJoinUseCase(spaceRepository, eventPublisher)
+	const participantJoinUseCase = new ParticipantJoinUseCase(spaceRepository, eventPublisher)
 	const join = async (spaceId: string, participant: Participant) => {
-		return await participantJoinedUseCase.execute(spaceId, participant)
+		return await participantJoinUseCase.execute(spaceId, participant)
 	}
 
-	const participantLeftUseCase = new ParticipantLeaveUseCase(spaceRepository, eventPublisher)
+	const participantLeaveUseCase = new ParticipantLeaveUseCase(spaceRepository, eventPublisher)
 	const leave = async (spaceId: string, participantId: string) => {
-		return await participantLeftUseCase.execute(spaceId, participantId)
+		return await participantLeaveUseCase.execute(spaceId, participantId)
 	}
 
 	const sendMessageUseCase = new SendMessageUseCase(spaceRepository, eventPublisher)

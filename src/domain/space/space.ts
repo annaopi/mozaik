@@ -43,10 +43,6 @@ export class Space {
 
 	getParticipant(id: string): Participant | undefined {
 		const participant = this.getParticipants().find((p) => p.getId() === id)
-		if (!participant) {
-			throw new Error(`Participant ${id} not found`)
-		}
-
 		return participant
 	}
 

@@ -24,7 +24,6 @@ async function run() {
 		name: "joke-teller",
 		instruction: "You are a joke teller. Use joke-actors tool to get joke actors.",
 		tools: [jokeTellerTool],
-		handlers: [],
 	})
 
 	const loop = await createLoop({

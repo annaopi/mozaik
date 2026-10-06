@@ -3,6 +3,7 @@ import { DirectiveExecutionStrategy } from "./directive-execution-strategy"
 import { ToolUseRunner } from "@domain/inference/tool-use-runner"
 import { Agent } from "@domain/agent/agent"
 import { Loop } from "@domain/agent/loop/loop"
+import { Tool } from "@domain/inference/tool"
 
 export class ToolUseExecutionStrategy implements DirectiveExecutionStrategy {
 	constructor(private readonly toolRunner: ToolUseRunner) {}
@@ -17,7 +18,7 @@ export class ToolUseExecutionStrategy implements DirectiveExecutionStrategy {
 			throw new Error("The loop has no pending tool execution")
 		}
 
-		const tool = agent.getTools().find((tool) => tool.name === directive.call.toolName)
+		const tool = agent.tools.find((tool: Tool) => tool.name === directive.call.toolName)
 
 		if (!tool) {
 			throw new Error(`Tool "${directive.call.toolName}" not found`)

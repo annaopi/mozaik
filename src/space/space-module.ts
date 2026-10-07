@@ -1,10 +1,10 @@
 import { RuntimeService } from "@space/domain/runtime"
 import { SituationHandler } from "@space/domain/situation-handler"
 import { SharedState } from "@space/domain/shared-state"
-import { RegisterParticipantUseCase } from "@space/application/register-participant"
+import { ParticipantJoinUseCase } from "@space/application/paricipant-join"
 import { InMemorySpaceRepository } from "@space/infrastructure/in-memory-space-repository"
 import { EventPublisher } from "@space/domain/event-publisher"
-import { RemoveParticipantUseCase } from "@space/application/remove-participant"
+import { ParticipantLeaveUseCase } from "@space/application/participant-leave"
 import { SendMessageUseCase } from "@space/application/send-message"
 import { CreateSpaceUseCase } from "@space/application/create-space"
 
@@ -37,20 +37,20 @@ export function defineSpaceModule<TSharedState extends SharedState>() {
 		return await createSpaceUseCase.execute(name)
 	}
 
-	const registerParticipantUseCase = new RegisterParticipantUseCase(spaceRepository, eventPublisher)
-	const registerParticipant = async <TParticipant>(
+	const participantJoinUseCase = new ParticipantJoinUseCase(spaceRepository, eventPublisher)
+	const join = async <TParticipant>(
 		name: string,
 		capabilities: readonly string[],
 		handlers: SituationHandler<TParticipant>[],
 		self: TParticipant,
 		spaceId: string,
 	) => {
-		return await registerParticipantUseCase.execute(name, capabilities, handlers, self, spaceId)
+		return await participantJoinUseCase.execute(name, capabilities, handlers, self, spaceId)
 	}
 
-	const removeParticipantUseCase = new RemoveParticipantUseCase(spaceRepository, eventPublisher)
-	const removeParticipant = async (spaceId: string, participantId: string) => {
-		return await removeParticipantUseCase.execute(spaceId, participantId)
+	const participantLeaveUseCase = new ParticipantLeaveUseCase(spaceRepository, eventPublisher)
+	const leave = async (spaceId: string, participantId: string) => {
+		return await participantLeaveUseCase.execute(spaceId, participantId)
 	}
 
 	const sendMessageUseCase = new SendMessageUseCase(spaceRepository, eventPublisher)
@@ -62,8 +62,8 @@ export function defineSpaceModule<TSharedState extends SharedState>() {
 		initializeRuntime,
 		resolveRuntime,
 		createSpace,
-		registerParticipant,
-		removeParticipant,
+		join,
+		leave,
 		sendMessage,
 	}
 }

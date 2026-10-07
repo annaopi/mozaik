@@ -2,6 +2,7 @@ import "dotenv/config"
 import { createLoop, createAgent, runLoop } from "./module"
 import { Tool } from "@inference/tool"
 import { LoopTransition } from "src/agent/domain/loop/transition"
+import { defaultRules } from "@agent/index"
 
 export const jokeTellerTool: Tool = {
 	name: "joke-actors",
@@ -30,7 +31,6 @@ async function run() {
 		subject: "Tell me a joke about the basketball players",
 		agentId: agent.id,
 		request: {
-			tools: agent.tools,
 			model: "gpt-5.4",
 			context: {
 				items: [

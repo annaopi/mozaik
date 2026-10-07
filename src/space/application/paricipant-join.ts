@@ -4,7 +4,7 @@ import { Participant, ParticipantManifest } from "@space/domain/participant"
 import { SituationHandler } from "@space/domain/situation-handler"
 import { UuidGenerator } from "@util/uuid-generator"
 
-export class RegisterParticipantUseCase<TParticipant> {
+export class ParticipantJoinUseCase<TParticipant> {
 	private readonly spaceRepository: SpaceRepository
 	private readonly eventPublisher: EventPublisher
 

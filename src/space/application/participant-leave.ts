@@ -1,7 +1,7 @@
 import { SpaceRepository } from "@space/domain/space-repository"
 import { EventPublisher } from "@space/domain/event-publisher"
 
-export class RemoveParticipantUseCase {
+export class ParticipantLeaveUseCase {
 	private readonly spaceRepository: SpaceRepository
 	private readonly eventPublisher: EventPublisher
 

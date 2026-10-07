@@ -10,4 +10,4 @@ export const { createAgent, createLoop, runLoop } = agentModule
 
 const spaceModule = defineSpaceModule()
 
-export const { createSpace, registerParticipant, removeParticipant, sendMessage } = spaceModule
+export const { createSpace, join, leave, sendMessage } = spaceModule

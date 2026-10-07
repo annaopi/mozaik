@@ -1,7 +1,7 @@
 import "dotenv/config"
 import { createLoop, createAgent, runLoop } from "./module"
-import { Tool } from "@domain/inference/tool"
-import { LoopTransition } from "@domain/agent/loop/transition"
+import { Tool } from "@inference/tool"
+import { LoopTransition } from "src/agent/domain/loop/transition"
 
 export const jokeTellerTool: Tool = {
 	name: "joke-actors",

@@ -12,15 +12,15 @@
 		"moduleResolution": "node",
 		"baseUrl": ".",
 		"paths": {
-			"@domain/*": ["src/domain/*"],
-			"@infrastructure/*": ["src/infrastructure/*"],
-			"@application/*": ["src/application/*"],
+			"@agent/*": ["src/agent/*"],
+			"@space/*": ["src/space/*"],
+			"@inference/*": ["src/inference/*"],
 			"@util/*": ["src/util/*"]
 		},
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true
 	},
-	"include": ["src", "src/domain/space/domain/types", "examples"],
+	"include": ["src", "examples"],
 	"exclude": ["node_modules", "dist"] // For now excluded tests
 }

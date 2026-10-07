@@ -1,6 +1,6 @@
-import { defineAgentModule } from "src/agent-module"
-import { LocalToolRunner } from "@application/runners/local-tool-runner"
-import { defineRuntime } from "src/define-runtime"
+import { defineAgentModule } from "src/agent/agent-module"
+import { LocalToolRunner } from "src/agent/application/runners/local-tool-runner"
+import { defineSpaceModule } from "@space/space-module"
 
 const agentModule = defineAgentModule({
 	toolRunner: new LocalToolRunner(),
@@ -8,6 +8,6 @@ const agentModule = defineAgentModule({
 
 export const { createAgent, createLoop, runLoop } = agentModule
 
-const spaceModule = defineRuntime()
+const spaceModule = defineSpaceModule()
 
-export const { createSpace, join, leave, sendMessage, createParticipant } = spaceModule
+export const { createSpace, registerParticipant, removeParticipant, sendMessage } = spaceModule

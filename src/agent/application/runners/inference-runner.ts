@@ -3,7 +3,7 @@ import type { InferenceResult } from "@inference/inference-result"
 import type { InferenceRunner } from "@inference/inference-runner"
 import type { InferenceRequestValidator } from "@inference/request-validation/inference-request-validator"
 import { GenerativeModel } from "@inference/generative-model"
-import { SpaceEvent } from "@space/domain/event"
+import { SpaceEvent } from "@util/space-event"
 
 export type InferenceCompletedParams = { answer: string; producerId: string; price?: number }
 

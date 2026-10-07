@@ -1,6 +1,6 @@
 import { InferenceRequest } from "@inference/inference-request"
 import { InferenceResult } from "@inference/inference-result"
-import { SpaceEvent } from "src/space/domain/event"
+import { SpaceEvent } from "@util/space-event"
 import type { InferenceEndpoint } from "@inference/inference-endpoint"
 import type { InferenceEndpointMapper } from "@inference/inference-endpoint-mapper"
 import { OpenAIChatCompletionsMapper } from "@agent/infrastructure/providers/openai/openai-chat-completions-mapper"

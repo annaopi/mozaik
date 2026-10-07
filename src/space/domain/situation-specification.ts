@@ -1,4 +1,4 @@
-import { SpaceEvent } from "@space/domain/event"
+import { SpaceEvent } from "@util/space-event"
 import { Participant } from "@space/domain/participant"
 
 export type SituationContext<TParticipant, TEvent extends SpaceEvent = SpaceEvent> = {

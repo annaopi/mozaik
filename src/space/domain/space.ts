@@ -1,4 +1,6 @@
-import { MessageSentEvent, ParticipantJoinedEvent, ParticipantLeftEvent, SpaceEvent } from "@space/domain/event"
+import { MessageSentEvent } from "@space/domain/events"
+import { ParticipantJoinedEvent, ParticipantLeftEvent } from "@space/domain/events"
+import { SpaceEvent } from "@util/space-event"
 import { Participant } from "@space/domain/participant"
 import { SystemClock } from "@util/system-clock"
 import { UuidGenerator } from "@util/uuid-generator"

@@ -1,4 +1,4 @@
-import { SpaceEvent } from "src/space/domain/event"
+import { SpaceEvent } from "@util/space-event"
 import { InferenceRequest } from "@inference/inference-request"
 import { InferenceResult } from "@inference/inference-result"
 import type { InferenceEndpoint } from "@inference/inference-endpoint"

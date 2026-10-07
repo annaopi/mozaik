@@ -1,7 +1,7 @@
 import type { InferenceEndpointMapper } from "@inference/inference-endpoint-mapper"
 import { InferenceRequest } from "@inference/inference-request"
 import { InferenceResult } from "@inference/inference-result"
-import { SpaceEvent } from "@space/domain/event"
+import { SpaceEvent } from "@util/space-event"
 
 export interface InferenceEndpoint {
 	endpointMapper: InferenceEndpointMapper

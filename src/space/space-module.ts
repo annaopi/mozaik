@@ -9,23 +9,11 @@ import { CreateSpaceUseCase } from "@space/application/create-space"
 import { SendEventUseCase } from "./application/send-event"
 import { SpaceEvent } from "@util/space-event"
 import { GetParticipantsUseCase } from "./application/get-participants"
-import { SpaceRepository } from "./domain/space-repository"
-
-type SpaceModule<TSharedState extends SharedState> = {
-	spaceRepository: SpaceRepository
-	eventPublisher: EventPublisher
-	state: TSharedState
-}
+import { SpaceModule, SpaceModuleConfig } from "@space/types"
 
 let module: SpaceModule<SharedState> | undefined
 
-export type SpaceModuleConfig<TSharedState extends SharedState = SharedState> = {
-	spaceRepository?: SpaceRepository
-	eventPublisher?: EventPublisher
-	state?: TSharedState
-}
-
-function initializeSpaceModule(config: SpaceModuleConfig<SharedState> = {}) {
+function initSpaceModule(config: SpaceModuleConfig<SharedState> = {}) {
 	if (module) {
 		throw new Error("Space module already registered")
 	}
@@ -89,4 +77,4 @@ const sendMessage = async (spaceId: string, participantId: string, message: stri
 	return await sendMessageUseCase.execute(spaceId, participantId, message)
 }
 
-export { createSpace, join, leave, getParticipants, sendEvent, sendMessage, initializeSpaceModule }
+export { createSpace, join, leave, getParticipants, sendEvent, sendMessage, initSpaceModule }

@@ -1,4 +1,3 @@
-import { defineAgentModule, InferenceRunnerConfig, AgentModuleConfig } from "@agent/agent-module"
 import { AgentRepository } from "@agent/domain/agent-repository"
 import { LoopRepository } from "@agent/domain/loop/repository"
 import { Agent } from "@agent/domain/agent"
@@ -10,15 +9,16 @@ import {
 	ToolUseAction,
 	WaitAction,
 } from "@agent/domain/loop/action"
-import { defaultRules } from "@agent/domain/loop/rule"
+import { Memory, MemoryFactory } from "@agent/domain/memory"
 
+export * from "@agent/types"
+export * from "@agent/agent-module"
 export {
-	defineAgentModule,
-	AgentModuleConfig,
-	InferenceRunnerConfig,
 	AgentRepository,
 	LoopRepository,
 	Agent,
+	MemoryFactory,
+	Memory,
 	AwaitingRequest,
 	AwaitingInference,
 	AwaitingToolOutput,
@@ -28,5 +28,4 @@ export {
 	ToolUseAction,
 	CompleteAction,
 	WaitAction,
-	defaultRules,
 }

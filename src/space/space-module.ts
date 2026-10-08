@@ -7,6 +7,8 @@ import { EventPublisher } from "@space/domain/event-publisher"
 import { ParticipantLeaveUseCase } from "@space/application/participant-leave"
 import { SendMessageUseCase } from "@space/application/send-message"
 import { CreateSpaceUseCase } from "@space/application/create-space"
+import { SendEventUseCase } from "./application/send-event"
+import { SpaceEvent } from "@util/space-event"
 
 export function defineSpaceModule<TSharedState extends SharedState>() {
 	let runtime: RuntimeService<TSharedState> | null = null
@@ -53,6 +55,11 @@ export function defineSpaceModule<TSharedState extends SharedState>() {
 		return await participantLeaveUseCase.execute(spaceId, participantId)
 	}
 
+	const sendEventUseCase = new SendEventUseCase(spaceRepository, eventPublisher)
+	const sendEvent = async (spaceId: string, participantId: string, event: SpaceEvent) => {
+		return await sendEventUseCase.execute(spaceId, participantId, event)
+	}
+
 	const sendMessageUseCase = new SendMessageUseCase(spaceRepository, eventPublisher)
 	const sendMessage = async (spaceId: string, participantId: string, message: string) => {
 		return await sendMessageUseCase.execute(spaceId, participantId, message)
@@ -64,6 +71,7 @@ export function defineSpaceModule<TSharedState extends SharedState>() {
 		createSpace,
 		join,
 		leave,
+		sendEvent,
 		sendMessage,
 	}
 }

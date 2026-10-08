@@ -1,5 +1,6 @@
 import { ParticipantManifest } from "@space/domain/participant"
 import { SpaceEvent } from "@util/space-event"
+import { SystemClock } from "@util/system-clock"
 
 export class ParticipantJoinedEvent extends SpaceEvent<"participant.joined", ParticipantManifest> {
 	static init(manifest: ParticipantManifest, occurredAt: Date): ParticipantJoinedEvent {
@@ -14,7 +15,8 @@ export class ParticipantLeftEvent extends SpaceEvent<"participant.left", Partici
 }
 
 export class MessageSentEvent extends SpaceEvent<"message.sent", { message: string }> {
-	static init(producerId: string, message: string, occurredAt: Date): MessageSentEvent {
+	static init(producerId: string, message: string): MessageSentEvent {
+		const occurredAt = SystemClock.now()
 		return SpaceEvent.create("message.sent", producerId, occurredAt, { message })
 	}
 }

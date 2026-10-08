@@ -1,5 +1,6 @@
 import { SpaceRepository } from "@space/domain/space-repository"
 import { EventPublisher } from "@space/domain/event-publisher"
+import { Participant } from "@space/domain/participant"
 
 export class ParticipantLeaveUseCase {
 	private readonly spaceRepository: SpaceRepository
@@ -10,7 +11,7 @@ export class ParticipantLeaveUseCase {
 		this.eventPublisher = eventPublisher
 	}
 
-	async execute(spaceId: string, participantId: string): Promise<void> {
+	async execute(spaceId: string, participantId: string): Promise<Participant<unknown>> {
 		const space = await this.spaceRepository.findById(spaceId)
 		if (!space) {
 			throw new Error("Space not found")
@@ -24,5 +25,6 @@ export class ParticipantLeaveUseCase {
 			this.eventPublisher.publish(event, space.getParticipants())
 		}
 		await this.spaceRepository.save(space)
+		return participant
 	}
 }

@@ -1,14 +1,14 @@
 import { SpaceRepository } from "@space/domain/space-repository"
 import { EventPublisher } from "@space/domain/event-publisher"
-import { MessageSentEvent } from "@space/domain/events"
+import { SpaceEvent } from "@util/space-event"
 
-export class SendMessageUseCase {
+export class SendEventUseCase {
 	constructor(
 		private readonly spaceRepository: SpaceRepository,
 		private readonly eventPublisher: EventPublisher,
 	) {}
 
-	async execute(spaceId: string, participantId: string, message: string): Promise<void> {
+	async execute(spaceId: string, participantId: string, event: SpaceEvent): Promise<void> {
 		const space = await this.spaceRepository.findById(spaceId)
 		if (!space) {
 			throw new Error("Space not found")
@@ -17,8 +17,6 @@ export class SendMessageUseCase {
 		if (!participant) {
 			throw new Error("Participant not found")
 		}
-		const event = MessageSentEvent.init(participant.getId(), message)
-
 		space.addEvent(event)
 		this.eventPublisher.publish(event, space.getParticipants())
 

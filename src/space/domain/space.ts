@@ -59,10 +59,8 @@ export class Space {
 		return [...this.participants]
 	}
 
-	sendMessage(participant: Participant<unknown>, message: string, occurredAt: Date): SpaceEvent {
-		const event = MessageSentEvent.init(participant.getId(), message, occurredAt)
+	addEvent(event: SpaceEvent) {
 		this.events.push(event)
-		return event
 	}
 
 	getEvents(): SpaceEvent[] {

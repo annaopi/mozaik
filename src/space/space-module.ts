@@ -15,7 +15,7 @@ let module: SpaceModule<SharedState> | undefined
 
 function initSpaceModule(config: SpaceModuleConfig<SharedState> = {}) {
 	if (module) {
-		throw new Error("Space module already registered")
+		throw new Error("Space module already initialized")
 	}
 
 	const spaceRepository = config.spaceRepository ?? new InMemorySpaceRepository()
@@ -30,7 +30,7 @@ function initSpaceModule(config: SpaceModuleConfig<SharedState> = {}) {
 
 export function resolveSpaceModule(): SpaceModule<SharedState> {
 	if (!module) {
-		throw new Error("Space module not registered")
+		throw new Error("Space module is not initialized")
 	}
 
 	return module

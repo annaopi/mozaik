@@ -49,7 +49,7 @@ function initAgentModule(config: AgentModuleConfig = {}) {
 
 function resolveAgentModule(): AgentModule {
 	if (!module) {
-		throw new Error("Agent module not registered")
+		throw new Error("Agent module is not initialized")
 	}
 
 	return module

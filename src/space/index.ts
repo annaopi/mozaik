@@ -1,15 +1,8 @@
 import { Participant } from "@space/domain/participant"
 import { SharedState } from "@space/domain/shared-state"
-import { defineSpaceModule } from "@space/space-module"
 import { SituationContext, SituationHandler, SituationProcessor } from "@space/domain/situation-handler"
 import { SituationSpecification } from "@space/domain/situation-specification"
 
-export {
-	defineSpaceModule,
-	SharedState,
-	Participant,
-	SituationHandler,
-	SituationProcessor,
-	SituationSpecification,
-	SituationContext,
-}
+export * from "@space/space-module"
+
+export { SharedState, Participant, SituationHandler, SituationProcessor, SituationSpecification, SituationContext }

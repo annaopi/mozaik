@@ -1,4 +1,3 @@
-import { RuntimeService } from "@space/domain/runtime"
 import { SituationHandler } from "@space/domain/situation-handler"
 import { SharedState } from "@space/domain/shared-state"
 import { ParticipantJoinUseCase } from "@space/application/paricipant-join"
@@ -10,75 +9,84 @@ import { CreateSpaceUseCase } from "@space/application/create-space"
 import { SendEventUseCase } from "./application/send-event"
 import { SpaceEvent } from "@util/space-event"
 import { GetParticipantsUseCase } from "./application/get-participants"
+import { SpaceRepository } from "./domain/space-repository"
 
-export function defineSpaceModule<TSharedState extends SharedState>() {
-	let runtime: RuntimeService<TSharedState> | null = null
+type SpaceModule<TSharedState extends SharedState> = {
+	spaceRepository: SpaceRepository
+	eventPublisher: EventPublisher
+	state: TSharedState
+}
 
-	function initializeRuntime(config: { state: TSharedState }): RuntimeService<TSharedState> {
-		if (runtime) {
-			throw new Error("Runtime already initialized")
-		}
+let module: SpaceModule<SharedState> | undefined
 
-		runtime = new RuntimeService(config.state)
+export type SpaceModuleConfig<TSharedState extends SharedState = SharedState> = {
+	spaceRepository?: SpaceRepository
+	eventPublisher?: EventPublisher
+	state?: TSharedState
+}
 
-		return runtime
+function initializeSpaceModule(config: SpaceModuleConfig<SharedState> = {}) {
+	if (module) {
+		throw new Error("Space module already registered")
 	}
 
-	function resolveRuntime(): RuntimeService<TSharedState> {
-		if (!runtime) {
-			throw new Error("Runtime not initialized")
-		}
+	const spaceRepository = config.spaceRepository ?? new InMemorySpaceRepository()
+	const eventPublisher = config.eventPublisher ?? new EventPublisher()
 
-		return runtime
-	}
-
-	const spaceRepository = new InMemorySpaceRepository()
-	const eventPublisher = new EventPublisher()
-
-	const createSpaceUseCase = new CreateSpaceUseCase(spaceRepository)
-	const createSpace = async (name: string) => {
-		return await createSpaceUseCase.execute(name)
-	}
-
-	const participantJoinUseCase = new ParticipantJoinUseCase(spaceRepository, eventPublisher)
-	const join = async <TParticipant>(
-		name: string,
-		capabilities: readonly string[],
-		handlers: SituationHandler<TParticipant>[],
-		self: TParticipant,
-		spaceId: string,
-	) => {
-		return await participantJoinUseCase.execute(name, capabilities, handlers, self, spaceId)
-	}
-
-	const participantLeaveUseCase = new ParticipantLeaveUseCase(spaceRepository, eventPublisher)
-	const leave = async (spaceId: string, participantId: string) => {
-		return await participantLeaveUseCase.execute(spaceId, participantId)
-	}
-
-	const getParticipantsUseCase = new GetParticipantsUseCase(spaceRepository)
-	const getParticipants = async (spaceId: string) => {
-		return await getParticipantsUseCase.execute(spaceId)
-	}
-
-	const sendEventUseCase = new SendEventUseCase(spaceRepository, eventPublisher)
-	const sendEvent = async (spaceId: string, participantId: string, event: SpaceEvent) => {
-		return await sendEventUseCase.execute(spaceId, participantId, event)
-	}
-
-	const sendMessageUseCase = new SendMessageUseCase(spaceRepository, eventPublisher)
-	const sendMessage = async (spaceId: string, participantId: string, message: string) => {
-		return await sendMessageUseCase.execute(spaceId, participantId, message)
-	}
-
-	return {
-		initializeRuntime,
-		resolveRuntime,
-		createSpace,
-		join,
-		leave,
-		getParticipants,
-		sendEvent,
-		sendMessage,
+	module = {
+		spaceRepository,
+		eventPublisher,
+		state: config.state ?? {},
 	}
 }
+
+export function resolveSpaceModule(): SpaceModule<SharedState> {
+	if (!module) {
+		throw new Error("Space module not registered")
+	}
+
+	return module
+}
+
+const createSpace = async (name: string) => {
+	const { spaceRepository } = resolveSpaceModule()
+	const createSpaceUseCase = new CreateSpaceUseCase(spaceRepository)
+	return await createSpaceUseCase.execute(name)
+}
+
+const join = async <TParticipant>(
+	name: string,
+	capabilities: readonly string[],
+	handlers: SituationHandler<TParticipant>[],
+	self: TParticipant,
+	spaceId: string,
+) => {
+	const { spaceRepository, eventPublisher } = resolveSpaceModule()
+	const participantJoinUseCase = new ParticipantJoinUseCase(spaceRepository, eventPublisher)
+	return await participantJoinUseCase.execute(name, capabilities, handlers, self, spaceId)
+}
+
+const leave = async (spaceId: string, participantId: string) => {
+	const { spaceRepository, eventPublisher } = resolveSpaceModule()
+	const participantLeaveUseCase = new ParticipantLeaveUseCase(spaceRepository, eventPublisher)
+	return await participantLeaveUseCase.execute(spaceId, participantId)
+}
+const getParticipants = async (spaceId: string) => {
+	const { spaceRepository } = resolveSpaceModule()
+	const getParticipantsUseCase = new GetParticipantsUseCase(spaceRepository)
+	return await getParticipantsUseCase.execute(spaceId)
+}
+
+const sendEvent = async (spaceId: string, participantId: string, event: SpaceEvent) => {
+	const { spaceRepository, eventPublisher } = resolveSpaceModule()
+	const sendEventUseCase = new SendEventUseCase(spaceRepository, eventPublisher)
+	return await sendEventUseCase.execute(spaceId, participantId, event)
+}
+
+const sendMessage = async (spaceId: string, participantId: string, message: string) => {
+	const { spaceRepository, eventPublisher } = resolveSpaceModule()
+	const sendMessageUseCase = new SendMessageUseCase(spaceRepository, eventPublisher)
+	return await sendMessageUseCase.execute(spaceId, participantId, message)
+}
+
+export { createSpace, join, leave, getParticipants, sendEvent, sendMessage, initializeSpaceModule }

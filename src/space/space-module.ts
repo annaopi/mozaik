@@ -9,6 +9,7 @@ import { SendMessageUseCase } from "@space/application/send-message"
 import { CreateSpaceUseCase } from "@space/application/create-space"
 import { SendEventUseCase } from "./application/send-event"
 import { SpaceEvent } from "@util/space-event"
+import { GetParticipantsUseCase } from "./application/get-participants"
 
 export function defineSpaceModule<TSharedState extends SharedState>() {
 	let runtime: RuntimeService<TSharedState> | null = null
@@ -55,6 +56,11 @@ export function defineSpaceModule<TSharedState extends SharedState>() {
 		return await participantLeaveUseCase.execute(spaceId, participantId)
 	}
 
+	const getParticipantsUseCase = new GetParticipantsUseCase(spaceRepository)
+	const getParticipants = async (spaceId: string) => {
+		return await getParticipantsUseCase.execute(spaceId)
+	}
+
 	const sendEventUseCase = new SendEventUseCase(spaceRepository, eventPublisher)
 	const sendEvent = async (spaceId: string, participantId: string, event: SpaceEvent) => {
 		return await sendEventUseCase.execute(spaceId, participantId, event)
@@ -71,6 +77,7 @@ export function defineSpaceModule<TSharedState extends SharedState>() {
 		createSpace,
 		join,
 		leave,
+		getParticipants,
 		sendEvent,
 		sendMessage,
 	}

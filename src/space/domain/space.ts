@@ -1,4 +1,3 @@
-import { MessageSentEvent } from "@space/domain/events"
 import { ParticipantJoinedEvent, ParticipantLeftEvent } from "@space/domain/events"
 import { SpaceEvent } from "@util/space-event"
 import { Participant } from "@space/domain/participant"

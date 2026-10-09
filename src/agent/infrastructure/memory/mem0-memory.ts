@@ -1,5 +1,5 @@
 import type { Memory } from "@agent/domain/memory"
-import type { ContextItem } from "../../../inference/context"
+import type { ContextItem } from "@inference/context"
 
 import MemoryClient from "mem0ai"
 
